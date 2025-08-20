@@ -50,14 +50,14 @@
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
-    // Background
+    // Background custom
     const bg = new Image();
-    bg.src = "Latar1.PNG"; 
+    bg.src = "Latar1.PNG"; // latar kamu
 
     let cameraX, score, hitCooldown, attackCooldown;
     let gameOver = false;
     let totalLives = 3; 
-    let bloodEffect = 0; // jumlah darah di layar
+    let bloodEffect = 0;
 
     // Player
     const playerImg = new Image();
@@ -67,15 +67,14 @@
     // Enemy
     const enemyImg = new Image();
     enemyImg.src = "tiger.png"; 
-    let enemy;
+    let enemies = [];
 
     // Heart
     const heartImg = new Image();
     heartImg.src = "heart.png"; 
 
     const keys = {};
-    const groundHeight = 100;
-    const grassOffset = 10;   
+    let groundHeight = 180; // pas sama rumput hijau latar
 
     document.addEventListener("keydown", (e) => keys[e.code] = true);
     document.addEventListener("keyup", (e) => {
@@ -90,6 +89,19 @@
       }
     });
 
+    function spawnEnemy() {
+      if (enemies.length >= 3) return; // maksimal 3 musuh
+      const enemy = {
+        worldX: cameraX + canvas.width + Math.random() * 600,
+        width: 100,
+        height: 80,
+        y: canvas.height - groundHeight - 80,
+        hp: 3,
+        speed: (Math.random() < 0.5 ? -1 : 1) * (1 + Math.random() * 2)
+      };
+      enemies.push(enemy);
+    }
+
     function resetGame(resetLives = false) {
       if (resetLives) totalLives = 3;
       cameraX = 0;
@@ -100,10 +112,11 @@
       bloodEffect = 0;
       restartBtn.style.display = "none";
       attackBtn.style.display = "block";
+      enemies = [];
 
       player = {
         x: 200,
-        y: canvas.height - groundHeight - 70 - grassOffset,
+        y: canvas.height - groundHeight - 70,
         width: 60,
         height: 70,
         dy: 0,
@@ -115,13 +128,8 @@
         hp: 3
       };
 
-      enemy = {
-        worldX: 800,
-        width: 80,
-        height: 60,
-        y: canvas.height - groundHeight - 60 - grassOffset,
-        hp: 3 // darah harimau
-      };
+      // spawn awal 2 musuh
+      for (let i = 0; i < 2; i++) spawnEnemy();
 
       gameLoop();
     }
@@ -137,19 +145,28 @@
         player.onGround = false;
       }
 
-      // Gravitasi
       player.dy += player.gravity;
       player.y += player.dy;
-      let groundY = canvas.height - groundHeight - player.height - grassOffset;
+
+      // Ground sesuai rumput
+      let groundY = canvas.height - groundHeight - player.height;
       if (player.y >= groundY) {
         player.y = groundY;
         player.dy = 0;
         player.onGround = true;
       }
 
-      let enemyScreenX = enemy.worldX - cameraX;
+      // Update musuh
+      enemies.forEach(enemy => {
+        enemy.y = canvas.height - groundHeight - enemy.height;
+        enemy.worldX += enemy.speed;
 
-      // Attack Player
+        // kalau kelewatan jauh → balik arah
+        if (enemy.worldX < cameraX - 200) enemy.speed *= -1;
+        if (enemy.worldX > cameraX + canvas.width + 200) enemy.speed *= -1;
+      });
+
+      // Attack
       if (player.attacking) {
         let attackRange = {
           x: player.x + player.width,
@@ -158,105 +175,132 @@
           height: player.height
         };
 
-        if (
-          attackRange.x < enemyScreenX + enemy.width &&
-          attackRange.x + attackRange.width > enemyScreenX &&
-          attackRange.y < enemy.y + enemy.height &&
-          attackRange.y + attackRange.height > enemy.y
-        ) {
-          enemy.hp -= 1;
-          player.attacking = false;
-          if (enemy.hp <= 0) {
-            score += 50;
-            enemy.worldX = 999999; // sembunyikan
+        enemies.forEach(enemy => {
+          let enemyScreenX = enemy.worldX - cameraX;
+          if (
+            attackRange.x < enemyScreenX + enemy.width &&
+            attackRange.x + attackRange.width > enemyScreenX &&
+            attackRange.y < enemy.y + enemy.height &&
+            attackRange.y + attackRange.height > enemy.y
+          ) {
+            enemy.hp -= 1;
+            player.attacking = false;
+            if (enemy.hp <= 0) {
+              score += 50;
+              enemies = enemies.filter(e => e !== enemy);
+            }
           }
-        }
+        });
       }
 
-      // Harimau menyerang balik
-      if (
-        player.x < enemyScreenX + enemy.width &&
-        player.x + player.width > enemyScreenX &&
-        player.y < enemy.y + enemy.height &&
-        player.y + player.height > enemy.y
-      ) {
-        if (hitCooldown <= 0) {
-          bloodEffect++;
-          hitCooldown = 60;
-          if (bloodEffect >= 3) {
-            totalLives--;
-            bloodEffect = 0;
-            if (totalLives <= 0) {
-              gameOver = true;
-              restartBtn.style.display = "block";
-              attackBtn.style.display = "none";
-              restartBtn.textContent = "Play Again";
-            } else {
-              gameOver = true;
-              restartBtn.style.display = "block";
-              attackBtn.style.display = "none";
-              restartBtn.textContent = "Restart";
+      // Damage ke player
+      enemies.forEach(enemy => {
+        let enemyScreenX = enemy.worldX - cameraX;
+        if (
+          player.x < enemyScreenX + enemy.width &&
+          player.x + player.width > enemyScreenX &&
+          player.y < enemy.y + enemy.height &&
+          player.y + player.height > enemy.y
+        ) {
+          if (hitCooldown <= 0) {
+            bloodEffect++;
+            hitCooldown = 60;
+            if (bloodEffect >= 3) {
+              totalLives--;
+              bloodEffect = 0;
+              if (totalLives <= 0) {
+                gameOver = true;
+                restartBtn.style.display = "block";
+                attackBtn.style.display = "none";
+                restartBtn.textContent = "Play Again";
+              } else {
+                gameOver = true;
+                restartBtn.style.display = "block";
+                attackBtn.style.display = "none";
+                restartBtn.textContent = "Restart";
+              }
             }
           }
         }
-      }
+      });
 
       if (hitCooldown > 0) hitCooldown--;
       if (attackCooldown > 0) attackCooldown--;
+
+      // spawn musuh random (jarang-jarang)
+      if (Math.random() < 0.005 && enemies.length < 3) {
+        spawnEnemy();
+      }
     }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Latar scrolling
       let bgWidth = canvas.width;
       let offsetX = -cameraX % bgWidth;
       if (offsetX > 0) offsetX -= bgWidth;
       ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
       ctx.drawImage(bg, offsetX + bgWidth, 0, bgWidth, canvas.height);
 
+      // Player
       ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
-      let enemyScreenX = enemy.worldX - cameraX;
-      if (enemy.hp > 0) {
-        ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
+      // Enemies
+      enemies.forEach(enemy => {
+        let enemyScreenX = enemy.worldX - cameraX;
+        if (enemy.hp > 0) {
+          ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
 
-        // HP bar harimau
-        ctx.fillStyle = "red";
-        ctx.fillRect(enemyScreenX, enemy.y - 20, enemy.width, 10);
-        ctx.fillStyle = "lime";
-        ctx.fillRect(enemyScreenX, enemy.y - 20, (enemy.hp / 3) * enemy.width, 10);
-      }
+          // HP bar enemy
+          ctx.fillStyle = "red";
+          ctx.fillRect(enemyScreenX, enemy.y - 20, enemy.width, 10);
+          ctx.fillStyle = "lime";
+          ctx.fillRect(enemyScreenX, enemy.y - 20, (enemy.hp / 3) * enemy.width, 10);
+        }
+      });
 
+      // Attack box
       if (player.attacking) {
         ctx.fillStyle = "rgba(255,0,0,0.5)";
         ctx.fillRect(player.x + player.width, player.y, 40, player.height);
       }
 
+      // Score
       ctx.fillStyle = "white";
-      ctx.font = "24px Arial";
+      ctx.font = "24px Arial Black";
       ctx.fillText("Score: " + score, 20, 40);
 
-      // Nyawa ❤️
+      // Level text
+      ctx.font = "40px Arial Black";
+      ctx.fillText("LEVEL 0", 20, 80);
+
+      // Hearts kanan atas
       for (let i = 0; i < totalLives; i++) {
         if (heartImg.complete && heartImg.naturalWidth !== 0) {
-          ctx.drawImage(heartImg, 20 + i * 40, 60, 30, 30);
+          ctx.drawImage(heartImg, canvas.width - (i + 1) * 40, 20, 30, 30);
         } else {
           ctx.fillStyle = "red";
           ctx.font = "30px Arial";
-          ctx.fillText("❤", 20 + i * 40, 85);
+          ctx.fillText("❤", canvas.width - (i + 1) * 40, 45);
         }
       }
 
-      // Efek darah di layar
+      // Blood overlay
       if (bloodEffect > 0) {
         ctx.fillStyle = "rgba(255,0,0,0.3)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
+      // Game Over
       if (gameOver) {
         ctx.fillStyle = "red";
         ctx.font = "60px Arial Black";
-        ctx.fillText("GAME OVER", canvas.width/2 - 150, canvas.height/2 - 100);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
       }
     }
 
