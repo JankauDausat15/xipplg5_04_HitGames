@@ -5,51 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Knight Adventure</title>
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #000;
-    }
-    canvas {
-      display: block;
-    }
-
-    /* Leaderboard Icon */
-    .leaderboard-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background: #ffcc00;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
-      transition: all 0.3s ease;
-      z-index: 100; /* biar muncul di atas canvas */
-    }
-
-    .leaderboard-btn:hover {
-      background: #ffaa00;
-      transform: scale(1.1);
-    }
-
-    .leaderboard-btn img {
-      width: 35px;
-      height: 35px;
-    }
+    body { margin: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
-
-  <!-- ✅ Tombol Leaderboard -->
-  <div class="leaderboard-btn" onclick="openLeaderboard()">
-    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828961.png" alt="Leaderboard">
-  </div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -65,60 +26,73 @@
 
     // Background
     const bg = new Image();
-    bg.src = "Latar1.PNG"; // background yang kamu kirim
+    bg.src = "Latar1.PNG"; 
+
+    let cameraX = 0; // posisi kamera (background scroll)
+    const scrollSpeed = 5;
 
     // Player
     const playerImg = new Image();
     playerImg.src = "knight.png"; 
     const player = {
-      x: 100,
+      x: 200, // posisi layar tetap
       y: 0,
       width: 60,
       height: 70,
-      dx: 0,
       dy: 0,
       speed: 6,
       jumpPower: -15,
       gravity: 0.8,
-      onGround: false
+      onGround: false,
+      attacking: false,
+      hp: 3
     };
 
     // Enemy
     const enemyImg = new Image();
     enemyImg.src = "tiger.png"; 
     const enemy = {
-      x: 500,
-      y: 0,
+      worldX: 800, // posisi asli di dunia (tidak ikut geser)
       width: 80,
       height: 60
     };
 
-    // ✅ Score (awal 0, kena musuh +5)
+    // Score, cooldown
     let score = 0;
-    let hitCooldown = 0; // biar ga langsung nambah tiap frame
+    let hitCooldown = 0;
+    let attackCooldown = 0;
 
     const keys = {};
-    let bgX = 0; 
-    const groundHeight = 100; 
+    const groundHeight = 100;
     const grassOffset = 10;   
 
     // Input
     document.addEventListener("keydown", (e) => keys[e.code] = true);
-    document.addEventListener("keyup", (e) => keys[e.code] = false);
+    document.addEventListener("keyup", (e) => {
+      keys[e.code] = false;
+      if (e.code === "KeyA") player.attacking = false;
+    });
 
     function update() {
+      // Gerak kamera (bukan player.x)
       if (keys["ArrowLeft"]) {
-        bgX += player.speed * 0.5;
+        cameraX -= scrollSpeed;
       }
       if (keys["ArrowRight"]) {
-        bgX -= player.speed * 0.5;
+        cameraX += scrollSpeed;
       }
 
+      // Lompat
       if (keys["Space"] && player.onGround) {
         player.dy = player.jumpPower;
         player.onGround = false;
       }
+      if (keys["KeyA"] && attackCooldown <= 0) {
+        player.attacking = true;
+        attackCooldown = 30;
+      }
 
+      // Gravitasi
       player.dy += player.gravity;
       player.y += player.dy;
 
@@ -129,56 +103,95 @@
         player.onGround = true;
       }
 
+      // Posisi musuh relatif ke layar
       enemy.y = canvas.height - groundHeight - enemy.height - grassOffset;
+      let enemyScreenX = enemy.worldX - cameraX;
 
-      // ✅ Deteksi tabrakan player vs musuh
+      // ✅ Tabarakan Player <-> Musuh
       if (
-        player.x < enemy.x + enemy.width &&
-        player.x + player.width > enemy.x &&
+        player.x < enemyScreenX + enemy.width &&
+        player.x + player.width > enemyScreenX &&
         player.y < enemy.y + enemy.height &&
         player.y + player.height > enemy.y
       ) {
         if (hitCooldown <= 0) {
-          score += 5; // tambah 5 tiap kena hit
-          hitCooldown = 60; // cooldown 1 detik (60 fps)
+          score += 5;
+          player.hp -= 1;
+          hitCooldown = 60;
         }
       }
 
-      if (hitCooldown > 0) {
-        hitCooldown--;
+      // ✅ Attack Player ke Musuh
+      if (player.attacking) {
+        let attackRange = {
+          x: player.x + player.width,
+          y: player.y,
+          width: 40,
+          height: player.height
+        };
+
+        if (
+          attackRange.x < enemyScreenX + enemy.width &&
+          attackRange.x + attackRange.width > enemyScreenX &&
+          attackRange.y < enemy.y + enemy.height &&
+          attackRange.y + attackRange.height > enemy.y
+        ) {
+          score += 10;
+          player.attacking = false;
+        }
       }
 
-      if (bgX <= -canvas.width) bgX = 0;
-      if (bgX >= canvas.width) bgX = 0;
+      if (hitCooldown > 0) hitCooldown--;
+      if (attackCooldown > 0) attackCooldown--;
     }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.drawImage(bg, bgX, 0, canvas.width, canvas.height);
-      ctx.drawImage(bg, bgX + canvas.width, 0, canvas.width, canvas.height);
+      // Infinite scroll background
+      let bgWidth = canvas.width;
+      let offsetX = -cameraX % bgWidth;
+      if (offsetX > 0) offsetX -= bgWidth;
+      ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
+      ctx.drawImage(bg, offsetX + bgWidth, 0, bgWidth, canvas.height);
 
+      // Player
       ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-      ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
 
-      // ✅ Tampilkan skor
+      // Musuh (di dunia, render sesuai kamera)
+      let enemyScreenX = enemy.worldX - cameraX;
+      ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
+
+      // Attack box
+      if (player.attacking) {
+        ctx.fillStyle = "rgba(255,0,0,0.5)";
+        ctx.fillRect(player.x + player.width, player.y, 40, player.height);
+      }
+
+      // HUD
       ctx.fillStyle = "white";
       ctx.font = "24px Arial";
       ctx.fillText("Score: " + score, 20, 40);
+      ctx.fillText("HP: " + player.hp, 20, 70);
+
+      // Game Over
+      if (player.hp <= 0) {
+        ctx.fillStyle = "red";
+        ctx.font = "60px Arial Black";
+        ctx.fillText("GAME OVER", canvas.width/2 - 150, canvas.height/2);
+        return;
+      }
     }
 
     function gameLoop() {
-      update();
-      draw();
-      requestAnimationFrame(gameLoop);
+      if (player.hp > 0) {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
     }
 
     bg.onload = () => gameLoop();
-
-    // ✅ Fungsi buka leaderboard
-    function openLeaderboard() {
-      window.location.href = "leaderboard.html";
-    }
   </script>
 </body>
 </html>
