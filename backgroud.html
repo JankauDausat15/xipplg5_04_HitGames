@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knight Adventure</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    canvas {
+      display: block;
+    }
+
+    /* Leaderboard Icon */
+    .leaderboard-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: #ffcc00;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
+      transition: all 0.3s ease;
+      z-index: 100; /* biar muncul di atas canvas */
+    }
+
+    .leaderboard-btn:hover {
+      background: #ffaa00;
+      transform: scale(1.1);
+    }
+
+    .leaderboard-btn img {
+      width: 35px;
+      height: 35px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- ✅ Tombol Leaderboard -->
+  <div class="leaderboard-btn" onclick="openLeaderboard()">
+    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828961.png" alt="Leaderboard">
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Resize fullscreen
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // Background
+    const bg = new Image();
+    bg.src = "Latar1.PNG"; // background yang kamu kirim
+
+    // Player
+    const playerImg = new Image();
+    playerImg.src = "knight.png"; 
+    const player = {
+      x: 100,
+      y: 0,
+      width: 60,
+      height: 70,
+      dx: 0,
+      dy: 0,
+      speed: 6,
+      jumpPower: -15,
+      gravity: 0.8,
+      onGround: false
+    };
+
+    // Enemy
+    const enemyImg = new Image();
+    enemyImg.src = "tiger.png"; 
+    const enemy = {
+      x: 500,
+      y: 0,
+      width: 80,
+      height: 60
+    };
+
+    const keys = {};
+    let bgX = 0; 
+    const groundHeight = 100; 
+    const grassOffset = 10;   
+
+    // Input
+    document.addEventListener("keydown", (e) => keys[e.code] = true);
+    document.addEventListener("keyup", (e) => keys[e.code] = false);
+
+    function update() {
+      if (keys["ArrowLeft"]) {
+        bgX += player.speed * 0.5;
+      }
+      if (keys["ArrowRight"]) {
+        bgX -= player.speed * 0.5;
+      }
+
+      if (keys["Space"] && player.onGround) {
+        player.dy = player.jumpPower;
+        player.onGround = false;
+      }
+
+      player.dy += player.gravity;
+      player.y += player.dy;
+
+      let groundY = canvas.height - groundHeight - player.height - grassOffset;
+      if (player.y >= groundY) {
+        player.y = groundY;
+        player.dy = 0;
+        player.onGround = true;
+      }
+
+      enemy.y = canvas.height - groundHeight - enemy.height - grassOffset;
+
+      if (bgX <= -canvas.width) bgX = 0;
+      if (bgX >= canvas.width) bgX = 0;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.drawImage(bg, bgX, 0, canvas.width, canvas.height);
+      ctx.drawImage(bg, bgX + canvas.width, 0, canvas.width, canvas.height);
+
+      ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+      ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    bg.onload = () => gameLoop();
+
+    // ✅ Fungsi buka leaderboard
+    function openLeaderboard() {
+      window.location.href = "leaderboard.html";
+    }
+  </script>
+</body>
+</html>
