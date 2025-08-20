@@ -7,16 +7,42 @@
   <style>
     body { margin: 0; overflow: hidden; background: #000; }
     canvas { display: block; }
+    #restartBtn, #attackBtn {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 30px;
+      font-size: 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: none;
+    }
+    #restartBtn {
+      top: 50%;
+      background: crimson;
+      color: white;
+    }
+    #restartBtn:hover { background: darkred; }
+    #attackBtn {
+      bottom: 20px;
+      background: gold;
+      color: black;
+    }
+    #attackBtn:hover { background: orange; }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+  <button id="restartBtn">Restart</button>
+  <button id="attackBtn">⚔️ Attack</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+    const restartBtn = document.getElementById("restartBtn");
+    const attackBtn = document.getElementById("attackBtn");
 
-    // Resize fullscreen
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -28,74 +54,92 @@
     const bg = new Image();
     bg.src = "Latar1.PNG"; 
 
-    let cameraX = 0; // posisi kamera (background scroll)
-    const scrollSpeed = 5;
+    let cameraX, score, hitCooldown, attackCooldown;
+    let gameOver = false;
+    let totalLives = 3; 
+    let bloodEffect = 0; // jumlah darah di layar
 
     // Player
     const playerImg = new Image();
     playerImg.src = "knight.png"; 
-    const player = {
-      x: 200, // posisi layar tetap
-      y: 0,
-      width: 60,
-      height: 70,
-      dy: 0,
-      speed: 6,
-      jumpPower: -15,
-      gravity: 0.8,
-      onGround: false,
-      attacking: false,
-      hp: 3
-    };
+    let player;
 
     // Enemy
     const enemyImg = new Image();
     enemyImg.src = "tiger.png"; 
-    const enemy = {
-      worldX: 800, // posisi asli di dunia (tidak ikut geser)
-      width: 80,
-      height: 60
-    };
+    let enemy;
 
-    // Score, cooldown
-    let score = 0;
-    let hitCooldown = 0;
-    let attackCooldown = 0;
+    // Heart
+    const heartImg = new Image();
+    heartImg.src = "heart.png"; 
 
     const keys = {};
     const groundHeight = 100;
     const grassOffset = 10;   
 
-    // Input
     document.addEventListener("keydown", (e) => keys[e.code] = true);
     document.addEventListener("keyup", (e) => {
       keys[e.code] = false;
       if (e.code === "KeyA") player.attacking = false;
     });
 
-    function update() {
-      // Gerak kamera (bukan player.x)
-      if (keys["ArrowLeft"]) {
-        cameraX -= scrollSpeed;
+    attackBtn.addEventListener("click", () => {
+      if (attackCooldown <= 0) {
+        player.attacking = true;
+        attackCooldown = 30;
       }
-      if (keys["ArrowRight"]) {
-        cameraX += scrollSpeed;
-      }
+    });
 
-      // Lompat
+    function resetGame(resetLives = false) {
+      if (resetLives) totalLives = 3;
+      cameraX = 0;
+      score = 0;
+      hitCooldown = 0;
+      attackCooldown = 0;
+      gameOver = false;
+      bloodEffect = 0;
+      restartBtn.style.display = "none";
+      attackBtn.style.display = "block";
+
+      player = {
+        x: 200,
+        y: canvas.height - groundHeight - 70 - grassOffset,
+        width: 60,
+        height: 70,
+        dy: 0,
+        speed: 6,
+        jumpPower: -15,
+        gravity: 0.8,
+        onGround: true,
+        attacking: false,
+        hp: 3
+      };
+
+      enemy = {
+        worldX: 800,
+        width: 80,
+        height: 60,
+        y: canvas.height - groundHeight - 60 - grassOffset,
+        hp: 3 // darah harimau
+      };
+
+      gameLoop();
+    }
+
+    function update() {
+      if (gameOver) return;
+
+      if (keys["ArrowLeft"]) cameraX -= 5;
+      if (keys["ArrowRight"]) cameraX += 5;
+
       if (keys["Space"] && player.onGround) {
         player.dy = player.jumpPower;
         player.onGround = false;
-      }
-      if (keys["KeyA"] && attackCooldown <= 0) {
-        player.attacking = true;
-        attackCooldown = 30;
       }
 
       // Gravitasi
       player.dy += player.gravity;
       player.y += player.dy;
-
       let groundY = canvas.height - groundHeight - player.height - grassOffset;
       if (player.y >= groundY) {
         player.y = groundY;
@@ -103,25 +147,9 @@
         player.onGround = true;
       }
 
-      // Posisi musuh relatif ke layar
-      enemy.y = canvas.height - groundHeight - enemy.height - grassOffset;
       let enemyScreenX = enemy.worldX - cameraX;
 
-      // ✅ Tabarakan Player <-> Musuh
-      if (
-        player.x < enemyScreenX + enemy.width &&
-        player.x + player.width > enemyScreenX &&
-        player.y < enemy.y + enemy.height &&
-        player.y + player.height > enemy.y
-      ) {
-        if (hitCooldown <= 0) {
-          score += 5;
-          player.hp -= 1;
-          hitCooldown = 60;
-        }
-      }
-
-      // ✅ Attack Player ke Musuh
+      // Attack Player
       if (player.attacking) {
         let attackRange = {
           x: player.x + player.width,
@@ -136,8 +164,40 @@
           attackRange.y < enemy.y + enemy.height &&
           attackRange.y + attackRange.height > enemy.y
         ) {
-          score += 10;
+          enemy.hp -= 1;
           player.attacking = false;
+          if (enemy.hp <= 0) {
+            score += 50;
+            enemy.worldX = 999999; // sembunyikan
+          }
+        }
+      }
+
+      // Harimau menyerang balik
+      if (
+        player.x < enemyScreenX + enemy.width &&
+        player.x + player.width > enemyScreenX &&
+        player.y < enemy.y + enemy.height &&
+        player.y + player.height > enemy.y
+      ) {
+        if (hitCooldown <= 0) {
+          bloodEffect++;
+          hitCooldown = 60;
+          if (bloodEffect >= 3) {
+            totalLives--;
+            bloodEffect = 0;
+            if (totalLives <= 0) {
+              gameOver = true;
+              restartBtn.style.display = "block";
+              attackBtn.style.display = "none";
+              restartBtn.textContent = "Play Again";
+            } else {
+              gameOver = true;
+              restartBtn.style.display = "block";
+              attackBtn.style.display = "none";
+              restartBtn.textContent = "Restart";
+            }
+          }
         }
       }
 
@@ -148,50 +208,74 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Infinite scroll background
       let bgWidth = canvas.width;
       let offsetX = -cameraX % bgWidth;
       if (offsetX > 0) offsetX -= bgWidth;
       ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
       ctx.drawImage(bg, offsetX + bgWidth, 0, bgWidth, canvas.height);
 
-      // Player
       ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
-      // Musuh (di dunia, render sesuai kamera)
       let enemyScreenX = enemy.worldX - cameraX;
-      ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
+      if (enemy.hp > 0) {
+        ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
 
-      // Attack box
+        // HP bar harimau
+        ctx.fillStyle = "red";
+        ctx.fillRect(enemyScreenX, enemy.y - 20, enemy.width, 10);
+        ctx.fillStyle = "lime";
+        ctx.fillRect(enemyScreenX, enemy.y - 20, (enemy.hp / 3) * enemy.width, 10);
+      }
+
       if (player.attacking) {
         ctx.fillStyle = "rgba(255,0,0,0.5)";
         ctx.fillRect(player.x + player.width, player.y, 40, player.height);
       }
 
-      // HUD
       ctx.fillStyle = "white";
       ctx.font = "24px Arial";
       ctx.fillText("Score: " + score, 20, 40);
-      ctx.fillText("HP: " + player.hp, 20, 70);
 
-      // Game Over
-      if (player.hp <= 0) {
+      // Nyawa ❤️
+      for (let i = 0; i < totalLives; i++) {
+        if (heartImg.complete && heartImg.naturalWidth !== 0) {
+          ctx.drawImage(heartImg, 20 + i * 40, 60, 30, 30);
+        } else {
+          ctx.fillStyle = "red";
+          ctx.font = "30px Arial";
+          ctx.fillText("❤", 20 + i * 40, 85);
+        }
+      }
+
+      // Efek darah di layar
+      if (bloodEffect > 0) {
+        ctx.fillStyle = "rgba(255,0,0,0.3)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      if (gameOver) {
         ctx.fillStyle = "red";
         ctx.font = "60px Arial Black";
-        ctx.fillText("GAME OVER", canvas.width/2 - 150, canvas.height/2);
-        return;
+        ctx.fillText("GAME OVER", canvas.width/2 - 150, canvas.height/2 - 100);
       }
     }
 
     function gameLoop() {
-      if (player.hp > 0) {
-        update();
-        draw();
-        requestAnimationFrame(gameLoop);
-      }
+      update();
+      draw();
+      if (!gameOver) requestAnimationFrame(gameLoop);
+      else requestAnimationFrame(draw);
     }
 
-    bg.onload = () => gameLoop();
+    restartBtn.addEventListener("click", () => {
+      if (totalLives > 0) {
+        resetGame(); 
+      } else {
+        resetGame(true); 
+      }
+    });
+
+    window.onload = () => resetGame();
   </script>
 </body>
 </html>
