@@ -93,6 +93,10 @@
       height: 60
     };
 
+    // ✅ Score (awal 0, kena musuh +5)
+    let score = 0;
+    let hitCooldown = 0; // biar ga langsung nambah tiap frame
+
     const keys = {};
     let bgX = 0; 
     const groundHeight = 100; 
@@ -127,6 +131,23 @@
 
       enemy.y = canvas.height - groundHeight - enemy.height - grassOffset;
 
+      // ✅ Deteksi tabrakan player vs musuh
+      if (
+        player.x < enemy.x + enemy.width &&
+        player.x + player.width > enemy.x &&
+        player.y < enemy.y + enemy.height &&
+        player.y + player.height > enemy.y
+      ) {
+        if (hitCooldown <= 0) {
+          score += 5; // tambah 5 tiap kena hit
+          hitCooldown = 60; // cooldown 1 detik (60 fps)
+        }
+      }
+
+      if (hitCooldown > 0) {
+        hitCooldown--;
+      }
+
       if (bgX <= -canvas.width) bgX = 0;
       if (bgX >= canvas.width) bgX = 0;
     }
@@ -139,6 +160,11 @@
 
       ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
       ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+
+      // ✅ Tampilkan skor
+      ctx.fillStyle = "white";
+      ctx.font = "24px Arial";
+      ctx.fillText("Score: " + score, 20, 40);
     }
 
     function gameLoop() {
