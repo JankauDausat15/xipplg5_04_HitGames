@@ -30,6 +30,28 @@
       color: black;
     }
     #attackBtn:hover { background: orange; }
+
+      /* Tombol leaderboard (piala bulat kanan bawah) */
+    #leaderboardBtn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: gold;
+      color: white;
+      font-size: 28px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #leaderboardBtn:hover {
+      background: orange;
+    }
   </style>
 </head>
 <body>
@@ -37,6 +59,8 @@
   <button id="restartBtn">Restart</button>
   <button id="attackBtn">⚔️ Attack</button>
 
+  <!-- 🔥 Tombol ke leaderboard -->
+  <button id="leaderboardBtn" onclick="window.location.href='leaderboard.html'">🏆</button>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -303,7 +327,6 @@
         ctx.textBaseline = "alphabetic";
       }
     }
-
     function gameLoop() {
       update();
       draw();
