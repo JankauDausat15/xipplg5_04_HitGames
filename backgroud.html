@@ -3,45 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Knight Adventure</title>
+  <title>Perfect Knight Adventure</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #000; }
-    canvas { display: block; }
-    #restartBtn, #attackBtn {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 15px 30px;
-      font-size: 20px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      display: none;
+    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Orbitron:wght@400;700;900&display=swap');
+    
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      background: linear-gradient(135deg, #1e3c72, #2a5298); 
+      font-family: 'Orbitron', monospace;
     }
+    
+    canvas { 
+      display: block; 
+      border: 2px solid #fff;
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+    
+    .ui-button {
+      position: absolute;
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    
     #restartBtn {
       top: 50%;
-      background: crimson;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
       color: white;
+      display: none;
     }
-    #restartBtn:hover { background: darkred; }
+    
+    #restartBtn:hover { 
+      background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+    
     #attackBtn {
-      bottom: 20px;
-      background: gold;
-      color: black;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(45deg, #feca57, #ff9ff3);
+      color: #2c2c54;
+      font-size: 20px;
     }
-    #attackBtn:hover { background: orange; }
+    
+    #attackBtn:hover { 
+      background: linear-gradient(45deg, #ff9ff3, #feca57);
+      transform: scale(1.05);
+    }
+    
+    #jumpBtn {
+      bottom: 30px;
+      right: 150px;
+      background: linear-gradient(45deg, #48dbfb, #0abde3);
+      color: white;
+      font-size: 20px;
+    }
+    
+    #jumpBtn:hover {
+      background: linear-gradient(45deg, #0abde3, #48dbfb);
+      transform: scale(1.05);
+    }
+    
+    .controls-info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .level-display {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #feca57;
+      font-size: 24px;
+      font-weight: 900;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
-  <button id="restartBtn">Restart</button>
-  <button id="attackBtn">⚔️ Attack</button>
+  <button id="restartBtn" class="ui-button">🔄 Main Lagi</button>
+  <button id="attackBtn" class="ui-button">⚔️ Serang</button>
+  <button id="jumpBtn" class="ui-button">🚀 Lompat</button>
+  
+  <div class="controls-info">
+    <strong>Controls:</strong><br>
+    ← → : Gerakkan kamera<br>
+    Space/🚀 : Lompat<br>
+    A/⚔️ : Serang<br>
+    R : Restart
+  </div>
+  
+  <div class="level-display" id="levelDisplay">LEVEL 1</div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const restartBtn = document.getElementById("restartBtn");
     const attackBtn = document.getElementById("attackBtn");
+    const jumpBtn = document.getElementById("jumpBtn");
+    const levelDisplay = document.getElementById("levelDisplay");
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
@@ -50,33 +128,54 @@
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
-    // Background custom
-    const bg = new Image();
-    bg.src = "Latar1.PNG"; // latar kamu
-
-    let cameraX, score, hitCooldown, attackCooldown;
-    let gameOver = false;
-    let totalLives = 3; 
-    let bloodEffect = 0;
-
-    // Player
+    // Original game assets
     const playerImg = new Image();
     playerImg.src = "knight.png"; 
-    let player;
-
-    // Enemy
+    
     const enemyImg = new Image();
     enemyImg.src = "tiger.png"; 
-    let enemies = [];
-
-    // Heart
+    
     const heartImg = new Image();
-    heartImg.src = "heart.png"; 
+    heartImg.src = "heart.png";
+    let gameOver = false;
+    let totalLives = 5;
+    let bloodEffect = 0;
+    let currentLevel = 1;
+    let enemiesDefeated = 0;
+    let particles = [];
+    let powerUps = [];
+    let backgroundStars = [];
+    
+    // Initialize background stars
+    for(let i = 0; i < 100; i++) {
+      backgroundStars.push({
+        x: Math.random() * 2000,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2 + 1,
+        speed: Math.random() * 0.5 + 0.2
+      });
+    }
 
+    // Player object
+    let player;
+    
+    // Enemies array for multiple enemies
+    let enemies = [];
+    
     const keys = {};
-    let groundHeight = 180; // pas sama rumput hijau latar
+    const groundHeight = 120;
+    const grassOffset = 15;
 
-    document.addEventListener("keydown", (e) => keys[e.code] = true);
+    // Event listeners
+    document.addEventListener("keydown", (e) => {
+      keys[e.code] = true;
+      if (e.code === "KeyR") {
+        if (gameOver) {
+          resetGame(totalLives <= 0);
+        }
+      }
+    });
+    
     document.addEventListener("keyup", (e) => {
       keys[e.code] = false;
       if (e.code === "KeyA") player.attacking = false;
@@ -88,95 +187,259 @@
         attackCooldown = 30;
       }
     });
+    
+    jumpBtn.addEventListener("click", () => {
+      if (player.onGround) {
+        player.dy = player.jumpPower;
+        player.onGround = false;
+        createParticles(player.x + player.width/2, player.y + player.height, 5, '#48dbfb');
+      }
+    });
 
-    function spawnEnemy() {
-      if (enemies.length >= 3) return; // maksimal 3 musuh
-      const enemy = {
-        worldX: cameraX + canvas.width + Math.random() * 600,
-        width: 100,
-        height: 80,
-        y: canvas.height - groundHeight - 80,
-        hp: 3,
-        speed: (Math.random() < 0.5 ? -1 : 1) * (1 + Math.random() * 2)
-      };
-      enemies.push(enemy);
+    // Particle system
+    function createParticles(x, y, count, color = '#ff6b6b') {
+      for(let i = 0; i < count; i++) {
+        particles.push({
+          x: x + (Math.random() - 0.5) * 20,
+          y: y + (Math.random() - 0.5) * 20,
+          dx: (Math.random() - 0.5) * 8,
+          dy: (Math.random() - 0.5) * 8,
+          size: Math.random() * 6 + 2,
+          color: color,
+          life: 30,
+          maxLife: 30
+        });
+      }
+    }
+    
+    function updateParticles() {
+      for(let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.dx;
+        p.y += p.dy;
+        p.dy += 0.3; // gravity
+        p.life--;
+        
+        if(p.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+    
+    function drawParticles() {
+      particles.forEach(p => {
+        let alpha = p.life / p.maxLife;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x - cameraX, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    // Power-up system
+    function createPowerUp(x, y, type = 'health') {
+      powerUps.push({
+        x: x,
+        y: y,
+        type: type,
+        collected: false,
+        bob: 0
+      });
+    }
+    
+    function updatePowerUps() {
+      for(let i = powerUps.length - 1; i >= 0; i--) {
+        let powerUp = powerUps[i];
+        powerUp.bob += 0.1;
+        
+        let powerUpScreenX = powerUp.x - cameraX;
+        
+        // Check collision with player
+        if (
+          player.x < powerUpScreenX + 30 &&
+          player.x + player.width > powerUpScreenX &&
+          player.y < powerUp.y + 30 &&
+          player.y + player.height > powerUp.y
+        ) {
+          if (powerUp.type === 'health' && totalLives < 5) {
+            totalLives++;
+            createParticles(powerUpScreenX + 15, powerUp.y + 15, 10, '#ff6b6b');
+          }
+          powerUps.splice(i, 1);
+          score += 20;
+        }
+      }
+    }
+    
+    function drawPowerUps() {
+      powerUps.forEach(powerUp => {
+        let screenX = powerUp.x - cameraX;
+        let bobY = powerUp.y + Math.sin(powerUp.bob) * 5;
+        
+        if (powerUp.type === 'health') {
+          if (heartImg.complete && heartImg.naturalWidth !== 0) {
+            ctx.drawImage(heartImg, screenX, bobY, 30, 30);
+          } else {
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(screenX, bobY, 30, 30);
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText('❤', screenX + 5, bobY + 22);
+          }
+        }
+      });
+    }
+
+    function spawnEnemies() {
+      enemies = [];
+      let enemyCount = Math.min(currentLevel + 3, 8); // Lebih banyak harimau
+      
+      for(let i = 0; i < enemyCount; i++) {
+        // Random posisi X dalam range yang luas
+        let randomX = Math.random() * 2000 + 400; // Random antara 400-2400
+        if (Math.random() < 0.3) { // 30% kemungkinan spawn di belakang player
+          randomX = -(Math.random() * 500 + 100); // Random antara -100 sampai -600
+        }
+        
+        enemies.push({
+          worldX: randomX,
+          width: 80,
+          height: 60,
+          y: canvas.height - groundHeight - 60 - grassOffset,
+          hp: Math.min(2 + currentLevel, 5),
+          maxHp: Math.min(2 + currentLevel, 5),
+          speed: 1 + currentLevel * 0.3 + (Math.random() * 0.5), // Random speed juga
+          alive: true
+        });
+      }
+      
+      // Spawn beberapa harimau tambahan di posisi random jauh
+      for(let i = 0; i < Math.min(currentLevel, 4); i++) {
+        let farRandomX = Math.random() * 1500 + 1000; // Random antara 1000-2500
+        if (Math.random() < 0.4) { // 40% kemungkinan spawn di belakang jauh
+          farRandomX = -(Math.random() * 800 + 200); // Random antara -200 sampai -1000
+        }
+        
+        enemies.push({
+          worldX: farRandomX,
+          width: 80,
+          height: 60,
+          y: canvas.height - groundHeight - 60 - grassOffset,
+          hp: Math.min(2 + currentLevel, 5),
+          maxHp: Math.min(2 + currentLevel, 5),
+          speed: 1 + currentLevel * 0.3 + (Math.random() * 0.7), // Speed lebih random
+          alive: true
+        });
+      }
     }
 
     function resetGame(resetLives = false) {
-      if (resetLives) totalLives = 3;
+      if (resetLives) {
+        totalLives = 5;
+        currentLevel = 1;
+        enemiesDefeated = 0;
+      }
+      
       cameraX = 0;
       score = 0;
       hitCooldown = 0;
       attackCooldown = 0;
       gameOver = false;
       bloodEffect = 0;
+      particles = [];
+      powerUps = [];
+      
       restartBtn.style.display = "none";
       attackBtn.style.display = "block";
-      enemies = [];
+      jumpBtn.style.display = "block";
+      levelDisplay.textContent = `LEVEL ${currentLevel}`;
 
       player = {
         x: 200,
-        y: canvas.height - groundHeight - 70,
+        y: canvas.height - groundHeight - 70 - grassOffset,
         width: 60,
         height: 70,
         dy: 0,
         speed: 6,
-        jumpPower: -15,
+        jumpPower: -16,
         gravity: 0.8,
         onGround: true,
         attacking: false,
-        hp: 3
+        hp: 3,
+        maxHp: 3
       };
 
-      // spawn awal 2 musuh
-      for (let i = 0; i < 2; i++) spawnEnemy();
+      spawnEnemies();
+      
+      // Add power-ups di posisi random juga
+      for(let i = 0; i < 5; i++) {
+        let randomPowerUpX = Math.random() * 1800 + 600; // Random antara 600-2400
+        createPowerUp(randomPowerUpX, canvas.height - groundHeight - 80, 'health');
+      }
 
       gameLoop();
+    }
+
+    function nextLevel() {
+      currentLevel++;
+      enemiesDefeated = 0;
+      score += 100 * currentLevel;
+      createParticles(canvas.width/2, canvas.height/2, 20, '#feca57');
+      
+      // Restore some health
+      if (totalLives < 5) totalLives++;
+      
+      levelDisplay.textContent = `LEVEL ${currentLevel}`;
+      spawnEnemies();
+      
+      // Add power-ups di posisi random untuk level baru
+      for(let i = 0; i < 4; i++) {
+        let randomPowerUpX = Math.random() * 1500 + 500; // Random antara 500-2000
+        createPowerUp(randomPowerUpX, canvas.height - groundHeight - 80, 'health');
+      }
     }
 
     function update() {
       if (gameOver) return;
 
-      if (keys["ArrowLeft"]) cameraX -= 5;
-      if (keys["ArrowRight"]) cameraX += 5;
+      // Camera movement
+      if (keys["ArrowLeft"]) cameraX -= 8;
+      if (keys["ArrowRight"]) cameraX += 8;
 
+      // Player jump
       if (keys["Space"] && player.onGround) {
         player.dy = player.jumpPower;
         player.onGround = false;
+        createParticles(player.x + player.width/2, player.y + player.height, 5, '#48dbfb');
       }
 
+      // Player physics
       player.dy += player.gravity;
       player.y += player.dy;
-
-      // Ground sesuai rumput
-      let groundY = canvas.height - groundHeight - player.height;
+      let groundY = canvas.height - groundHeight - player.height - grassOffset;
       if (player.y >= groundY) {
         player.y = groundY;
         player.dy = 0;
         player.onGround = true;
       }
 
-      // Update musuh
-      enemies.forEach(enemy => {
-        enemy.y = canvas.height - groundHeight - enemy.height;
-        enemy.worldX += enemy.speed;
-
-        // kalau kelewatan jauh → balik arah
-        if (enemy.worldX < cameraX - 200) enemy.speed *= -1;
-        if (enemy.worldX > cameraX + canvas.width + 200) enemy.speed *= -1;
-      });
-
-      // Attack
+      // Attack logic
       if (player.attacking) {
         let attackRange = {
           x: player.x + player.width,
           y: player.y,
-          width: 40,
+          width: 50,
           height: player.height
         };
 
         enemies.forEach(enemy => {
+          if (!enemy.alive) return;
+          
           let enemyScreenX = enemy.worldX - cameraX;
+          
           if (
             attackRange.x < enemyScreenX + enemy.width &&
             attackRange.x + attackRange.width > enemyScreenX &&
@@ -185,17 +448,32 @@
           ) {
             enemy.hp -= 1;
             player.attacking = false;
+            createParticles(enemyScreenX + enemy.width/2, enemy.y + enemy.height/2, 8, '#ff6b6b');
+            
             if (enemy.hp <= 0) {
-              score += 50;
-              enemies = enemies.filter(e => e !== enemy);
+              enemy.alive = false;
+              score += 50 + currentLevel * 10;
+              enemiesDefeated++;
+              createParticles(enemyScreenX + enemy.width/2, enemy.y + enemy.height/2, 15, '#feca57');
             }
           }
         });
       }
 
-      // Damage ke player
+      // Enemy AI and collision
       enemies.forEach(enemy => {
+        if (!enemy.alive) return;
+        
         let enemyScreenX = enemy.worldX - cameraX;
+        
+        // Simple AI - move towards player
+        if (enemyScreenX > player.x + player.width + 100) {
+          enemy.worldX -= enemy.speed;
+        } else if (enemyScreenX + enemy.width < player.x - 100) {
+          enemy.worldX += enemy.speed;
+        }
+        
+        // Collision with player
         if (
           player.x < enemyScreenX + enemy.width &&
           player.x + player.width > enemyScreenX &&
@@ -203,123 +481,202 @@
           player.y + player.height > enemy.y
         ) {
           if (hitCooldown <= 0) {
-            bloodEffect++;
-            hitCooldown = 60;
-            if (bloodEffect >= 3) {
-              totalLives--;
-              bloodEffect = 0;
-              if (totalLives <= 0) {
-                gameOver = true;
-                restartBtn.style.display = "block";
-                attackBtn.style.display = "none";
-                restartBtn.textContent = "Play Again";
-              } else {
-                gameOver = true;
-                restartBtn.style.display = "block";
-                attackBtn.style.display = "none";
-                restartBtn.textContent = "Restart";
-              }
+            bloodEffect = 60;
+            hitCooldown = 90;
+            createParticles(player.x + player.width/2, player.y + player.height/2, 10, '#ff0000');
+            totalLives--;
+            
+            if (totalLives <= 0) {
+              gameOver = true;
+              restartBtn.style.display = "block";
+              attackBtn.style.display = "none";
+              jumpBtn.style.display = "none";
+              restartBtn.textContent = "🔄 Main Lagi";
             }
           }
         }
       });
 
+      // Check if level completed
+      if (enemiesDefeated >= enemies.filter(e => e.alive).length && enemies.length > 0) {
+        nextLevel();
+      }
+
+      // Update systems
+      updateParticles();
+      updatePowerUps();
+
+      // Update cooldowns
       if (hitCooldown > 0) hitCooldown--;
       if (attackCooldown > 0) attackCooldown--;
+      if (bloodEffect > 0) bloodEffect--;
+    }
 
-      // spawn musuh random (jarang-jarang)
-      if (Math.random() < 0.005 && enemies.length < 3) {
-        spawnEnemy();
+    // Original background image
+    const bg = new Image();
+    bg.src = "Latar1.PNG"; 
+
+    function drawBackground() {
+      // Use original background image like in original game
+      let bgWidth = canvas.width;
+      let offsetX = -cameraX % bgWidth;
+      if (offsetX > 0) offsetX -= bgWidth;
+      
+      if (bg.complete && bg.naturalWidth !== 0) {
+        ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
+        ctx.drawImage(bg, offsetX + bgWidth, 0, bgWidth, canvas.height);
+      } else {
+        // Fallback if image not loaded
+        let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#87CEEB');
+        gradient.addColorStop(1, '#98FB98');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    function drawPlayer() {
+      // Use original knight.png sprite
+      if (playerImg.complete && playerImg.naturalWidth !== 0) {
+        // Add glow effect while keeping original sprite
+        if (hitCooldown > 0) {
+          ctx.shadowColor = '#ff0000';
+          ctx.shadowBlur = 15;
+        } else {
+          ctx.shadowColor = '#48dbfb';
+          ctx.shadowBlur = 8;
+        }
+        
+        // Apply transparency when hit
+        if (hitCooldown > 0 && hitCooldown % 10 > 5) {
+          ctx.globalAlpha = 0.5;
+        }
+        
+        ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+      } else {
+        // Fallback colored rectangle if image not loaded
+        ctx.fillStyle = hitCooldown > 0 && hitCooldown % 10 > 5 ? 'rgba(65,105,225,0.7)' : '#4169E1';
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+      }
+    }
+
+    function drawEnemies() {
+      enemies.forEach(enemy => {
+        if (!enemy.alive) return;
+        
+        let enemyScreenX = enemy.worldX - cameraX;
+        
+        // Use original tiger.png sprite
+        if (enemyImg.complete && enemyImg.naturalWidth !== 0) {
+          ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
+        } else {
+          // Fallback colored rectangle if image not loaded
+          ctx.fillStyle = '#FF4500';
+          ctx.fillRect(enemyScreenX, enemy.y, enemy.width, enemy.height);
+        }
+        
+        // HP bar (same as original)
+        ctx.fillStyle = 'red';
+        ctx.fillRect(enemyScreenX, enemy.y - 20, enemy.width, 10);
+        ctx.fillStyle = 'lime';
+        ctx.fillRect(enemyScreenX, enemy.y - 20, (enemy.hp / enemy.maxHp) * enemy.width, 10);
+      });
+    }
+
+    function drawUI() {
+      // Score
+      ctx.shadowColor = 'black';
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 28px Orbitron';
+      ctx.fillText(`Score: ${score}`, 30, 50);
+      
+      // Lives (using original heart.png)
+      for (let i = 0; i < totalLives; i++) {
+        if (heartImg.complete && heartImg.naturalWidth !== 0) {
+          ctx.drawImage(heartImg, 30 + i * 40, 70, 30, 30);
+        } else {
+          ctx.fillStyle = 'red';
+          ctx.font = '30px Arial';
+          ctx.fillText('❤', 30 + i * 40, 95);
+        }
+      }
+      
+      // Attack range visualization (same as original)
+      if (player.attacking) {
+        ctx.fillStyle = 'rgba(255,0,0,0.5)';
+        ctx.fillRect(player.x + player.width, player.y, 50, player.height);
+      }
+      
+      // Blood effect
+      if (bloodEffect > 0) {
+        ctx.fillStyle = `rgba(255,0,0,${bloodEffect/100})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      // Level progress
+      let aliveEnemies = enemies.filter(e => e.alive).length;
+      if (aliveEnemies > 0) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(canvas.width - 250, 20, 220, 40);
+        ctx.fillStyle = '#feca57';
+        ctx.font = 'bold 18px Orbitron';
+        ctx.fillText(`Enemies: ${aliveEnemies}`, canvas.width - 240, 45);
       }
     }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      drawBackground();
+      drawParticles();
+      drawPowerUps();
+      drawPlayer();
+      drawEnemies();
+      drawUI();
 
-      // Latar scrolling
-      let bgWidth = canvas.width;
-      let offsetX = -cameraX % bgWidth;
-      if (offsetX > 0) offsetX -= bgWidth;
-      ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
-      ctx.drawImage(bg, offsetX + bgWidth, 0, bgWidth, canvas.height);
-
-      // Player
-      ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-
-      // Enemies
-      enemies.forEach(enemy => {
-        let enemyScreenX = enemy.worldX - cameraX;
-        if (enemy.hp > 0) {
-          ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
-
-          // HP bar enemy
-          ctx.fillStyle = "red";
-          ctx.fillRect(enemyScreenX, enemy.y - 20, enemy.width, 10);
-          ctx.fillStyle = "lime";
-          ctx.fillRect(enemyScreenX, enemy.y - 20, (enemy.hp / 3) * enemy.width, 10);
-        }
-      });
-
-      // Attack box
-      if (player.attacking) {
-        ctx.fillStyle = "rgba(255,0,0,0.5)";
-        ctx.fillRect(player.x + player.width, player.y, 40, player.height);
-      }
-
-      // Score
-      ctx.fillStyle = "white";
-      ctx.font = "24px Arial Black";
-      ctx.fillText("Score: " + score, 20, 40);
-
-      // Level text
-      ctx.font = "40px Arial Black";
-      ctx.fillText("LEVEL 0", 20, 80);
-
-      // Hearts kanan atas
-      for (let i = 0; i < totalLives; i++) {
-        if (heartImg.complete && heartImg.naturalWidth !== 0) {
-          ctx.drawImage(heartImg, canvas.width - (i + 1) * 40, 20, 30, 30);
-        } else {
-          ctx.fillStyle = "red";
-          ctx.font = "30px Arial";
-          ctx.fillText("❤", canvas.width - (i + 1) * 40, 45);
-        }
-      }
-
-      // Blood overlay
-      if (bloodEffect > 0) {
-        ctx.fillStyle = "rgba(255,0,0,0.3)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
-      // Game Over
       if (gameOver) {
-        ctx.fillStyle = "red";
-        ctx.font = "60px Arial Black";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
-        ctx.textAlign = "start";
-        ctx.textBaseline = "alphabetic";
+        // Game Over screen
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.shadowColor = 'red';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = '#ff6b6b';
+        ctx.font = 'bold 60px Creepster';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 50);
+        
+        ctx.shadowBlur = 5;
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 24px Orbitron';
+        ctx.fillText(`Final Score: ${score}`, canvas.width/2, canvas.height/2 + 20);
+        ctx.fillText(`Level Reached: ${currentLevel}`, canvas.width/2, canvas.height/2 + 60);
+        
+        ctx.textAlign = 'left';
       }
     }
 
     function gameLoop() {
       update();
       draw();
-      if (!gameOver) requestAnimationFrame(gameLoop);
-      else requestAnimationFrame(draw);
+      if (!gameOver) {
+        requestAnimationFrame(gameLoop);
+      } else {
+        requestAnimationFrame(draw);
+      }
     }
 
     restartBtn.addEventListener("click", () => {
-      if (totalLives > 0) {
-        resetGame(); 
-      } else {
-        resetGame(true); 
-      }
+      resetGame(totalLives <= 0);
     });
 
-    window.onload = () => resetGame();
+    // Start the game
+    window.onload = () => {
+      setTimeout(() => resetGame(true), 100);
+    };
   </script>
 </body>
 </html>
