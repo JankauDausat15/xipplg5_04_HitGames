@@ -5,6 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌿 Jungle Runaway 🌿</title>
   <style>
+    /* 🎮 Popup Username */
+#usernamePopup {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 11;
+}
+.popup-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
+.popup-box h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+}
+.popup-box input {
+  width: 90%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  text-align: center;
+}
+.popup-box button {
+  padding: 10px 30px;
+  border: none;
+  border-radius: 10px;
+  background: #27ae60;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.popup-box button:hover { background: #219150; }
     body { margin: 0; overflow: hidden; font-family: 'Trebuchet MS', sans-serif; }
 
     /* 🎮 Menu Awal */
@@ -110,9 +154,17 @@
   <div id="mainMenu">
     <div class="overlay">
       <h1>🌿 Jungle Runaway 🌿</h1>
-      <button class="btn" onclick="startGame()">▶ Mainkan</button>
+      <button class="btn" onclick="showUsernamePopup()">▶ Mainkan</button>
     </div>
   </div>
+  <!-- 🎮 Popup Username -->
+<div id="usernamePopup">
+  <div class="popup-box">
+    <h2>Masukkan Username</h2>
+    <input type="text" id="usernameInput" placeholder="Username kamu">
+    <button onclick="submitUsername()">OK</button>
+  </div>
+</div>
 
   <!-- 🎮 Game Canvas -->
   <canvas id="gameCanvas"></canvas>
@@ -127,6 +179,25 @@
     const attackBtn = document.getElementById("attackBtn");
     const leaderboardBtn = document.getElementById("leaderboardBtn");
     const mainMenu = document.getElementById("mainMenu");
+    const usernamePopup = document.getElementById("usernamePopup");
+const usernameInput = document.getElementById("usernameInput");
+
+let username = "";
+
+function showUsernamePopup() {
+  usernamePopup.style.display = "flex";
+}
+
+function submitUsername() {
+  if (usernameInput.value.trim() === "") {
+    alert("Username tidak boleh kosong!");
+    return;
+  }
+  username = usernameInput.value.trim();
+  usernamePopup.style.display = "none";
+  mainMenu.style.display = "none";
+  resetGame(); // mulai game setelah username diisi
+}
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
