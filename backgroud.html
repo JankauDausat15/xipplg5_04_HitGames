@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌿 Jungle Runaway 🌿</title>
+  <title>🌿 Petualangan Anak Rimba 🌿</title>
   <style>
     /* ========== GLOBAL ==========
        Tips aset: siapkan file berikut di folder yang sama
@@ -95,20 +95,23 @@
   </style>
 </head>
 <body>
-  <!-- ===== MENU AWAL ===== -->
-  <div id="mainMenu">
-    <div class="overlay">
-      <h1>🌿 Jungle Runaway 🌿</h1>
-      <div class="menu-row">
-        <button class="btn" onclick="startGame()">▶ Mainkan</button>
-        <button class="btn secondary" onclick="toggleHowTo()">❓ Cara Main</button>
-        <div id="howto" style="display:none; text-align:left; font-weight:600; line-height:1.4; max-width:520px;"> 
-          ◀▶/Arrow: Gerak • Space: Lompat • A/⚔️: Attack • Shift: Dash (iframes) • Esc: Pause<br/>
-          Kumpulkan koin dari musuh, ambil power-up (🛡️ Shield, 💪 Strength). Combo naik jika pukulan beruntun cepat.
-        </div>
+ <!-- ===== MENU AWAL ===== -->
+<div id="mainMenu">
+  <div class="overlay">
+    <h1>🌿 Petualangan Anak Rimba 🌿</h1>
+    <div class="menu-row">
+      <!-- Input Username -->
+      <input type="text" id="usernameInput" placeholder="Masukkan Username"
+             style="padding:10px; border-radius:10px; border:none; text-align:center; font-size:1rem;" />
+      <button class="btn" onclick="startGame()">▶ Mainkan</button>
+      <button class="btn secondary" onclick="toggleHowTo()">❓ Cara Main</button>
+      <div id="howto" style="display:none; text-align:left; font-weight:600; line-height:1.4; max-width:520px;"> 
+        ◀▶/Arrow: Gerak • Space: Lompat • A/⚔: Attack • Shift: Dash • Esc: Pause<br/>
+        Kumpulkan koin dari musuh, ambil power-up (🛡 Shield, 💪 Strength).
       </div>
     </div>
   </div>
+</div>
 
   <!-- ===== GAME & UI ===== -->
   <canvas id="gameCanvas"></canvas>
@@ -125,7 +128,7 @@
 
   <div id="pauseOverlay">
     <div id="pauseCard">
-      <h2>⏸️ Dijeda</h2>
+      <h2>⏸ Dijeda</h2>
       <p>Gunakan waktu ini buat atur strategi! 😉</p>
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
         <button class="btn" onclick="resumeGame()">Lanjut</button>
@@ -136,20 +139,22 @@
   </div>
 
   <button id="restartBtn">Restart</button>
-  <button id="attackBtn">⚔️ Attack</button>
+  <button id="attackBtn">⚔ Attack</button>
   <button id="leaderboardBtn" onclick="window.location.href='leaderboard.html'">🏆</button>
 
   <!-- 🔊 Audio -->
-  <audio id="hitSound" src="hit.wav" preload="auto"></audio>
-  <audio id="hurtSound" src="hurt.wav" preload="auto"></audio>
-  <audio id="killSound" src="kill.wav" preload="auto"></audio>
+<audio id="hitSound" src="hit.wav" preload="auto"></audio>
+<audio id="hurtSound" src="hurt.wav" preload="auto"></audio>
+<audio id="killSound" src="kill.wav" preload="auto"></audio>
+<audio id="bgMusic" src="bgm.mp3" preload="auto" loop></audio>
+
 
   <!-- Mobile touch controls -->
   <div id="touchControls">
     <button id="btnLeft" class="tc-btn">◀</button>
     <button id="btnRight" class="tc-btn">▶</button>
     <button id="btnJump" class="tc-btn">⤴</button>
-    <button id="btnAtk" class="tc-btn">⚔️</button>
+    <button id="btnAtk" class="tc-btn">⚔</button>
     <button id="btnDash" class="tc-btn">Dash</button>
   </div>
 
@@ -519,11 +524,71 @@
     function startGame(){
       mainMenu.style.display='none'; restartBtn.style.display='none'; attackBtn.style.display='block'; leaderboardBtn.style.display='block';
       totalLives = 3; resetGame();
+      // Ambil audio BGM
+const bgMusic = document.getElementById("bgMusic");
+
+function startGame(){
+  const input = document.getElementById("usernameInput");
+  if(!input.value.trim()){
+    alert("Masukkan username dulu!");
+    return;
+  }
+  currentPlayer = input.value.trim();
+  localStorage.setItem("currentPlayer", currentPlayer);
+
+  mainMenu.style.display='none';
+  restartBtn.style.display='none';
+  attackBtn.style.display='block';
+  leaderboardBtn.style.display='block';
+  totalLives = 3; 
+  resetGame();
+
+  // 🔊 Mulai musik background
+  bgMusic.currentTime = 0;
+  bgMusic.volume = 0.4;   // bisa diatur 0.0 - 1.0
+  bgMusic.play().catch(()=>{}); 
+}
+
     }
     function togglePause(){ if (gameOver) return; paused = !paused; pauseOverlay.style.display = paused? 'flex':'none'; }
     function resumeGame(){ paused=false; pauseOverlay.style.display='none'; }
     function restartFromPause(){ paused=false; pauseOverlay.style.display='none'; resetGame(true); }
     function backToMenu(){ paused=false; gameOver=true; pauseOverlay.style.display='none'; mainMenu.style.display='flex'; attackBtn.style.display='none'; }
+
+    // Username global
+let currentPlayer = "";
+
+// Modifikasi startGame agar ambil username
+function startGame(){
+  const input = document.getElementById("usernameInput");
+  if(!input.value.trim()){
+    alert("Masukkan username dulu!");
+    return;
+  }
+  currentPlayer = input.value.trim();
+  localStorage.setItem("currentPlayer", currentPlayer);
+
+  mainMenu.style.display='none';
+  restartBtn.style.display='none';
+  attackBtn.style.display='block';
+  leaderboardBtn.style.display='block';
+  totalLives = 3; 
+  resetGame();
+}
+
+// Saat game over, simpan skor otomatis
+function gameOverHandler(){
+  gameOver = true; 
+  attackBtn.style.display='none'; 
+  restartBtn.style.display='block';
+
+  // Simpan skor ke leaderboard
+  if(currentPlayer){
+    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    leaderboard.push({ name: currentPlayer, score: Math.floor(score) });
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+  }
+}
 
     restartBtn.addEventListener('click', ()=>{ if (totalLives>0) resetGame(); else resetGame(true); });
 

@@ -63,6 +63,18 @@
         <th>Player</th>
         <th>Score</th>
       </tr>
+      <h2>Tambah Skor Manual</h2>
+<div style="margin:20px;">
+  <input id="nameInput" type="text" placeholder="Nama Pemain" 
+         style="padding:8px; border-radius:6px; border:none;"/>
+  <input id="scoreInput" type="number" placeholder="Skor" 
+         style="padding:8px; border-radius:6px; border:none; width:120px;"/>
+  <button onclick="manualAddScore()" 
+          style="padding:8px 16px; border:none; border-radius:6px; background:gold; font-weight:bold; cursor:pointer;">
+    ➕ Tambah
+  </button>
+</div>
+
     </thead>
     <tbody>
       <!-- Top 10 Player masuk sini -->
@@ -72,7 +84,27 @@
   <a href="backgroud.html" class="back-btn">⬅ Back to Game</a>
 
   <script>
-    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+   let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    // ✅ Fungsi untuk menampilkan leaderboard
+
+
+    function manualAddScore(){
+  let name = document.getElementById("nameInput").value.trim();
+  let score = parseInt(document.getElementById("scoreInput").value);
+
+  if(!name || isNaN(score)){
+    alert("Masukkan nama dan skor yang valid!");
+    return;
+  }
+
+  leaderboard.push({ name, score });
+  localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+  renderLeaderboard();
+
+  // reset input
+  document.getElementById("nameInput").value = "";
+  document.getElementById("scoreInput").value = "";
+}
 
     function renderLeaderboard() {
       leaderboard.sort((a, b) => b.score - a.score);
