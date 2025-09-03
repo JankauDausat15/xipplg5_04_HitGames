@@ -1,989 +1,534 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
-  <title>Perfect Knight Adventure</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌿 Petualangan Anak Rimba 🌿</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Orbitron:wght@400;700;900&display=swap');
-    
-    body { 
-      margin: 0; 
-      overflow: hidden; 
-      background: linear-gradient(135deg, #1e3c72, #2a5298); 
-      font-family: 'Orbitron', monospace;
-=======
-  <title>🌿 Jungle Runaway 🌿</title>
-  <style>
-    /* 🎮 Popup Username */
-#usernamePopup {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 11;
-}
-.popup-box {
-  background: #fff;
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  width: 300px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.8);
-}
-.popup-box h2 {
-  margin-bottom: 20px;
-  font-size: 24px;
-  color: #333;
-}
-.popup-box input {
-  width: 90%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  text-align: center;
-}
-.popup-box button {
-  padding: 10px 30px;
-  border: none;
-  border-radius: 10px;
-  background: #27ae60;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  font-weight: bold;
-}
-.popup-box button:hover { background: #219150; }
-    body { margin: 0; overflow: hidden; font-family: 'Trebuchet MS', sans-serif; }
+    /* ========== GLOBAL ==========
+       Tips aset: siapkan file berikut di folder yang sama
+       - download.jpeg  (background menu)
+       - Latar1.PNG     (background level / bisa pattern lebar apa saja)
+       - knight.png     (sprite player)
+       - tiger.png      (sprite musuh biasa)
+       - tiger_boss.png (sprite boss — opsional; fallback pakai tiger.png)
+       - heart.png      (ikon nyawa)
+       - coin.png       (ikon koin)
+       - shield.png     (ikon power-up shield)
+       - strength.png   (ikon power-up strength)
+       - hit.wav, hurt.wav, kill.wav (audio efek — sudah aku sisipkan link unduhan terpisah)
+    */
 
-    /* 🎮 Menu Awal */
+    :root {
+      --ui-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    body { margin: 0; overflow: hidden; font-family: "Trebuchet MS", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #000; }
+    canvas { display: block; background: #000; }
+
+    /* ========== MENU AWAL ========== */
     #mainMenu {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 10;
       background: url('download.jpeg') no-repeat center center/cover;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
     }
     .overlay {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 60px;
-      border-radius: 20px;
-      text-align: center;
-      color: #fff;
-      box-shadow: 0 0 25px rgba(0,0,0,0.8);
-      animation: fadeIn 2s ease-in-out;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 48px 56px; border-radius: 20px; text-align: center; color: #fff;
+      box-shadow: var(--ui-shadow); animation: fadeIn 700ms ease-out;
+      backdrop-filter: blur(2px);
     }
-    .overlay h1 {
-      font-size: 3.2rem;
-      margin-bottom: 40px;
-      text-shadow: 3px 3px 6px black;
-      letter-spacing: 2px;
-    }
+    .overlay h1 { font-size: 2.6rem; margin: 0 0 24px; text-shadow: 3px 3px 6px #000; letter-spacing: 1px; }
+    .menu-row { display: grid; gap: 12px; grid-auto-flow: row; }
+
     .btn {
-      padding: 15px 60px;
-      font-size: 1.4rem;
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
+      padding: 14px 28px; font-size: 1.05rem; border: none; border-radius: 14px; cursor: pointer; color: #fff;
+      font-weight: 700; letter-spacing: .7px; transition: transform .15s ease, filter .2s ease; box-shadow: var(--ui-shadow);
       background: linear-gradient(45deg, #27ae60, #2ecc71);
-      color: white;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      transition: all 0.3s;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     }
-    .btn:hover {
-      background: linear-gradient(45deg, #2ecc71, #27ae60);
-      transform: scale(1.1);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9);}
-      to { opacity: 1; transform: scale(1);}
-    }
+    .btn:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.06); }
 
-    /* 🎮 Canvas Game */
-    canvas { display: block; background: #000; }
+    .btn.secondary { background: linear-gradient(45deg, #555, #777); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px) scale(.98);} to { opacity: 1; transform: none; } }
+
+    /* ========== IN-GAME UI ========== */
     #restartBtn, #attackBtn {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 15px 30px;
-      font-size: 20px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      display: none;
-      z-index: 5;
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
+      position: absolute; left: 50%; transform: translateX(-50%);
+      padding: 12px 22px; font-size: 18px; border: none; border-radius: 12px; cursor: pointer; display: none; z-index: 5;
+      box-shadow: var(--ui-shadow);
     }
-    
-    canvas { 
-      display: block; 
-      border: 2px solid #fff;
-      box-shadow: 0 0 20px rgba(255,255,255,0.3);
-    }
-    
-    .ui-button {
-      position: absolute;
-      padding: 15px 30px;
-      font-size: 18px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-family: 'Orbitron', monospace;
-      font-weight: 700;
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    }
-    
-    #restartBtn {
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-      color: white;
-      display: none;
-    }
-    
-    #restartBtn:hover { 
-      background: linear-gradient(45deg, #ee5a24, #ff6b6b);
-      transform: translate(-50%, -50%) scale(1.05);
-    }
-    
-    #attackBtn {
-      bottom: 30px;
-      right: 30px;
-      background: linear-gradient(45deg, #feca57, #ff9ff3);
-      color: #2c2c54;
-      font-size: 20px;
-    }
-    
-    #attackBtn:hover { 
-      background: linear-gradient(45deg, #ff9ff3, #feca57);
-      transform: scale(1.05);
-    }
-    
-    #jumpBtn {
-      bottom: 30px;
-      right: 150px;
-      background: linear-gradient(45deg, #48dbfb, #0abde3);
-      color: white;
-      font-size: 20px;
-    }
-    
-    #jumpBtn:hover {
-      background: linear-gradient(45deg, #0abde3, #48dbfb);
-      transform: scale(1.05);
-    }
-    
-    .controls-info {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      color: white;
-      background: rgba(0,0,0,0.5);
-      padding: 15px;
-      border-radius: 10px;
-      font-size: 14px;
-      backdrop-filter: blur(10px);
-    }
-    
-    .level-display {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: #feca57;
-      font-size: 24px;
-      font-weight: 900;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-<<<<<<< HEAD
-=======
-    #attackBtn:hover { background: orange; }
+    #restartBtn { top: 50%; background: crimson; color: #fff; }
+    #restartBtn:hover { background: #a20; }
+    #attackBtn { bottom: 20px; background: gold; color: #000; }
+    #attackBtn:hover { filter: brightness(1.1); }
 
-    /* Tombol leaderboard */
     #leaderboardBtn {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: gold;
-      color: white;
-      font-size: 28px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0px 4px 8px rgba(0,0,0,0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 5;
+      position: absolute; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%;
+      background: gold; color: #fff; font-size: 28px; border: none; cursor: pointer; display: none; z-index: 5;
+      box-shadow: var(--ui-shadow);
     }
-    #leaderboardBtn:hover { background: orange; }
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
+    #leaderboardBtn:hover { filter: brightness(1.1); }
+
+    /* HUD */
+    .hud { position: absolute; top: 12px; left: 12px; color: #fff; z-index: 4; text-shadow: 0 2px 6px #000; }
+    .hud .row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+    .pill { background: rgba(0,0,0,.35); padding: 8px 12px; border-radius: 999px; box-shadow: var(--ui-shadow); }
+    .bar { width: 220px; height: 12px; background: rgba(255,255,255,.15); border-radius: 999px; overflow: hidden; }
+    .bar > span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #2ecc71, #27ae60); }
+
+    .coins { position: absolute; top: 12px; right: 12px; color: #fff; z-index: 4; display: flex; align-items: center; gap: 8px; }
+    .coins img { width: 26px; height: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+
+    /* Pause overlay */
+    #pauseOverlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); display: none; z-index: 8; align-items: center; justify-content: center; }
+    #pauseCard { background: rgba(20,20,20,.85); color: #fff; padding: 24px; border-radius: 16px; width: min(92vw, 460px); box-shadow: var(--ui-shadow); text-align: center; }
+    #pauseCard h2 { margin-top: 0; }
+
+    /* Mobile controls */
+    #touchControls { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 6; }
+    .tc-btn { pointer-events: auto; position: absolute; bottom: 18px; width: 64px; height: 64px; border-radius: 50%; border: none; opacity: .85; box-shadow: var(--ui-shadow); font-size: 22px; }
+    #btnLeft { left: 18px; background: #333; color: #fff; }
+    #btnRight { left: 94px; background: #333; color: #fff; }
+    #btnJump { right: 18px; background: #2d89ef; color: #fff; }
+    #btnAtk { right: 94px; background: gold; color: #000; }
+    #btnDash { right: 170px; background: #9147ff; color: #fff; width: 56px; height: 56px; bottom: 90px; border-radius: 14px; }
   </style>
 </head>
 <body>
-  <!-- 🎮 Menu Awal -->
+  <!-- ===== MENU AWAL ===== -->
   <div id="mainMenu">
     <div class="overlay">
-      <h1>🌿 Jungle Runaway 🌿</h1>
-      <button class="btn" onclick="showUsernamePopup()">▶ Mainkan</button>
+      <h1>🌿 Petualangan Anak Rimba 🌿</h1>
+      <div class="menu-row">
+        <button class="btn" onclick="startGame()">▶ Mainkan</button>
+        <button class="btn secondary" onclick="toggleHowTo()">❓ Cara Main</button>
+        <div id="howto" style="display:none; text-align:left; font-weight:600; line-height:1.4; max-width:520px;"> 
+          ◀▶/Arrow: Gerak • Space: Lompat • A/⚔️: Attack • Shift: Dash (iframes) • Esc: Pause<br/>
+          Kumpulkan koin dari musuh, ambil power-up (🛡️ Shield, 💪 Strength). Combo naik jika pukulan beruntun cepat.
+        </div>
+      </div>
     </div>
   </div>
-  <!-- 🎮 Popup Username -->
-<div id="usernamePopup">
-  <div class="popup-box">
-    <h2>Masukkan Username</h2>
-    <input type="text" id="usernameInput" placeholder="Username kamu">
-    <button onclick="submitUsername()">OK</button>
-  </div>
-</div>
 
-  <!-- 🎮 Game Canvas -->
+  <!-- ===== GAME & UI ===== -->
   <canvas id="gameCanvas"></canvas>
-<<<<<<< HEAD
-  <button id="restartBtn" class="ui-button">🔄 Main Lagi</button>
-  <button id="attackBtn" class="ui-button">⚔️ Serang</button>
-  <button id="jumpBtn" class="ui-button">🚀 Lompat</button>
-  
-  <div class="controls-info">
-    <strong>Controls:</strong><br>
-    ← → : Gerakkan kamera<br>
-    Space/🚀 : Lompat<br>
-    A/⚔️ : Serang<br>
-    R : Restart
+  <div class="hud">
+    <div class="row">
+      <div id="scorePill" class="pill">Score: <span id="scoreText">0</span> • Level: <span id="levelText">1</span> • Combo: <span id="comboText">x1</span></div>
+      <div class="pill" style="display:flex; align-items:center; gap:10px;">
+        Stamina
+        <div class="bar"><span id="staminaBar"></span></div>
+      </div>
+    </div>
   </div>
-  
-  <div class="level-display" id="levelDisplay">LEVEL 1</div>
-=======
+  <div class="coins"><img src="coin.png" alt="coin" onerror="this.style.display='none'"/><b id="coinText">0</b></div>
+
+  <div id="pauseOverlay">
+    <div id="pauseCard">
+      <h2>⏸️ Dijeda</h2>
+      <p>Gunakan waktu ini buat atur strategi! 😉</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn" onclick="resumeGame()">Lanjut</button>
+        <button class="btn" onclick="restartFromPause()">Ulangi</button>
+        <button class="btn secondary" onclick="backToMenu()">Menu</button>
+      </div>
+    </div>
+  </div>
+
   <button id="restartBtn">Restart</button>
   <button id="attackBtn">⚔️ Attack</button>
   <button id="leaderboardBtn" onclick="window.location.href='leaderboard.html'">🏆</button>
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
+
+  <!-- 🔊 Audio -->
+  <audio id="hitSound" src="hit.wav" preload="auto"></audio>
+  <audio id="hurtSound" src="hurt.wav" preload="auto"></audio>
+  <audio id="killSound" src="kill.wav" preload="auto"></audio>
+
+  <!-- Mobile touch controls -->
+  <div id="touchControls">
+    <button id="btnLeft" class="tc-btn">◀</button>
+    <button id="btnRight" class="tc-btn">▶</button>
+    <button id="btnJump" class="tc-btn">⤴</button>
+    <button id="btnAtk" class="tc-btn">⚔️</button>
+    <button id="btnDash" class="tc-btn">Dash</button>
+  </div>
 
   <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const restartBtn = document.getElementById("restartBtn");
-    const attackBtn = document.getElementById("attackBtn");
-<<<<<<< HEAD
-    const jumpBtn = document.getElementById("jumpBtn");
-    const levelDisplay = document.getElementById("levelDisplay");
-=======
-    const leaderboardBtn = document.getElementById("leaderboardBtn");
-    const mainMenu = document.getElementById("mainMenu");
-    const usernamePopup = document.getElementById("usernamePopup");
-const usernameInput = document.getElementById("usernameInput");
+    // ===== Canvas & Context =====
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+    addEventListener('resize', resizeCanvas); resizeCanvas();
 
-let username = "";
+    // ===== UI Elements =====
+    const restartBtn = document.getElementById('restartBtn');
+    const attackBtn = document.getElementById('attackBtn');
+    const leaderboardBtn = document.getElementById('leaderboardBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    const pauseOverlay = document.getElementById('pauseOverlay');
+    const scoreText = document.getElementById('scoreText');
+    const levelText = document.getElementById('levelText');
+    const comboText = document.getElementById('comboText');
+    const staminaFill = document.getElementById('staminaBar');
+    const coinText = document.getElementById('coinText');
 
-function showUsernamePopup() {
-  usernamePopup.style.display = "flex";
-}
+    // ===== Audio =====
+    const hitSound = document.getElementById('hitSound');
+    const hurtSound = document.getElementById('hurtSound');
+    const killSound = document.getElementById('killSound');
 
-function submitUsername() {
-  if (usernameInput.value.trim() === "") {
-    alert("Username tidak boleh kosong!");
-    return;
-  }
-  username = usernameInput.value.trim();
-  usernamePopup.style.display = "none";
-  mainMenu.style.display = "none";
-  resetGame(); // mulai game setelah username diisi
-}
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
+    // ===== Assets =====
+    const bg = new Image(); bg.src = 'Latar1.PNG';
+    const playerImg = new Image(); playerImg.src = 'knight.png';
+    const enemyImg = new Image(); enemyImg.src = 'tiger.png';
+    const bossImg = new Image(); bossImg.src = 'tiger_boss.png'; // opsional
+    const heartImg = new Image(); heartImg.src = 'heart.png';
+    const coinImg = new Image(); coinImg.src = 'coin.png';
+    const shieldImg = new Image(); shieldImg.src = 'shield.png';
+    const strengthImg = new Image(); strengthImg.src = 'strength.png';
 
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
+    // ===== Game State =====
+    let cameraX = 0;
+    let score = 0;
+    let totalLives = 3;
+    let level = 1; let nextLevelScore = 200; let showLevelUp = 0;
+    let hitCooldown = 0; let attackCooldown = 0; let gameOver = false; let paused = false;
+    let bloodEffect = 0; let invulnTimer = 0; // i-frames
 
-    // Original game assets
-    const playerImg = new Image();
-    playerImg.src = "knight.png"; 
-    
-    const enemyImg = new Image();
-    enemyImg.src = "tiger.png"; 
-    
-    const heartImg = new Image();
-    heartImg.src = "heart.png";
-    let gameOver = false;
-    let totalLives = 5;
-    let bloodEffect = 0;
-    let currentLevel = 1;
-    let enemiesDefeated = 0;
-    let particles = [];
-    let powerUps = [];
-    let backgroundStars = [];
-    
-    // Initialize background stars
-    for(let i = 0; i < 100; i++) {
-      backgroundStars.push({
-        x: Math.random() * 2000,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 2 + 1,
-        speed: Math.random() * 0.5 + 0.2
-      });
-    }
+    let stamina = 100, maxStamina = 100; // attack & dash resource
+    let coins = 0;
 
-    // Player object
-    let player;
-    
-    // Enemies array for multiple enemies
+    const keys = {}; let groundHeight = 180;
+
+    const player = {
+      x: 200, y: 0, width: 60, height: 70,
+      dy: 0, speed: 6, jumpPower: -15, gravity: 0.8,
+      onGround: true, attacking: false,
+      damage: 1, // base damage
+      facing: 1, // 1 right, -1 left
+      dashCD: 0, dashSpeed: 16,
+      shieldTimer: 0,
+      strengthTimer: 0
+    };
+
     let enemies = [];
-    
-    const keys = {};
-<<<<<<< HEAD
-    const groundHeight = 120;
-    const grassOffset = 15;
-=======
-    let groundHeight = 180;
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
+    let drops = []; // coins & powerups
 
-    // Event listeners
-    document.addEventListener("keydown", (e) => {
+    // ===== Input =====
+    document.addEventListener('keydown', (e)=>{
       keys[e.code] = true;
-      if (e.code === "KeyR") {
-        if (gameOver) {
-          resetGame(totalLives <= 0);
-        }
-      }
+      if(e.code === 'Escape') togglePause();
+      if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') tryDash();
+      if(e.code === 'KeyA') tryAttack();
+      if(e.code === 'ArrowLeft') player.facing = -1;
+      if(e.code === 'ArrowRight') player.facing = 1;
     });
-    
-    document.addEventListener("keyup", (e) => {
-      keys[e.code] = false;
-      if (e.code === "KeyA") player.attacking = false;
-    });
+    document.addEventListener('keyup', (e)=>{ keys[e.code] = false; if(e.code==='KeyA') player.attacking = false; });
 
-    attackBtn.addEventListener("click", () => {
-      if (attackCooldown <= 0) {
-        player.attacking = true;
-        attackCooldown = 30;
-      }
-    });
-    
-    jumpBtn.addEventListener("click", () => {
-      if (player.onGround) {
-        player.dy = player.jumpPower;
-        player.onGround = false;
-        createParticles(player.x + player.width/2, player.y + player.height, 5, '#48dbfb');
-      }
-    });
+    // Touch controls (shown on small screens)
+    const touchControls = document.getElementById('touchControls');
+    const btnLeft = document.getElementById('btnLeft');
+    const btnRight = document.getElementById('btnRight');
+    const btnJump = document.getElementById('btnJump');
+    const btnAtk = document.getElementById('btnAtk');
+    const btnDash = document.getElementById('btnDash');
 
-<<<<<<< HEAD
-    // Particle system
-    function createParticles(x, y, count, color = '#ff6b6b') {
-      for(let i = 0; i < count; i++) {
-        particles.push({
-          x: x + (Math.random() - 0.5) * 20,
-          y: y + (Math.random() - 0.5) * 20,
-          dx: (Math.random() - 0.5) * 8,
-          dy: (Math.random() - 0.5) * 8,
-          size: Math.random() * 6 + 2,
-          color: color,
-          life: 30,
-          maxLife: 30
-        });
-      }
+    function showTouchIfNeeded(){
+      if (matchMedia('(max-width: 900px)').matches) touchControls.style.display = 'block';
+      else touchControls.style.display = 'none';
     }
-    
-    function updateParticles() {
-      for(let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
-        p.x += p.dx;
-        p.y += p.dy;
-        p.dy += 0.3; // gravity
-        p.life--;
-        
-        if(p.life <= 0) {
-          particles.splice(i, 1);
-        }
-      }
+    addEventListener('resize', showTouchIfNeeded); showTouchIfNeeded();
+
+    const hold = (el, down, up)=>{
+      const on = ()=>down(); const off = ()=>up();
+      el.addEventListener('touchstart', e=>{ e.preventDefault(); on(); });
+      el.addEventListener('touchend', e=>{ e.preventDefault(); off(); });
+      el.addEventListener('mousedown', e=>{ e.preventDefault(); on(); });
+      el.addEventListener('mouseup', e=>{ e.preventDefault(); off(); });
+      el.addEventListener('mouseleave', e=>{ e.preventDefault(); off(); });
+    };
+    let holdLeft=false, holdRight=false;
+    hold(btnLeft, ()=>holdLeft=true, ()=>holdLeft=false);
+    hold(btnRight, ()=>holdRight=true, ()=>holdRight=false);
+    btnJump.addEventListener('click', ()=>{ if(player.onGround) { player.dy = player.jumpPower; player.onGround=false; } });
+    btnAtk.addEventListener('click', ()=> tryAttack());
+    btnDash.addEventListener('click', ()=> tryDash());
+
+    attackBtn.addEventListener('click', ()=> tryAttack());
+
+    function tryAttack(){
+      if (attackCooldown>0) return;
+      if (stamina < 10) return; // cost
+      player.attacking = true; attackCooldown = 24; stamina -= 10;
+      // play safely (ignore autoplay restrictions)
+      hitSound.currentTime=0; hitSound.play().catch(()=>{});
     }
-    
-    function drawParticles() {
-      particles.forEach(p => {
-        let alpha = p.life / p.maxLife;
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x - cameraX, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      });
+    function tryDash(){
+      if (player.dashCD>0) return;
+      if (stamina < 20) return;
+      stamina -= 20; player.dashCD = 60; invulnTimer = 20; // 20 frames i-frames
+      // instant burst movement
+      const dir = (keys['ArrowLeft']||holdLeft) ? -1 : 1;
+      cameraX += dir * player.dashSpeed * 12; // move camera to simulate dash
     }
 
-    // Power-up system
-    function createPowerUp(x, y, type = 'health') {
-      powerUps.push({
-        x: x,
-        y: y,
-        type: type,
-        collected: false,
-        bob: 0
-      });
-    }
-    
-    function updatePowerUps() {
-      for(let i = powerUps.length - 1; i >= 0; i--) {
-        let powerUp = powerUps[i];
-        powerUp.bob += 0.1;
-        
-        let powerUpScreenX = powerUp.x - cameraX;
-        
-        // Check collision with player
-        if (
-          player.x < powerUpScreenX + 30 &&
-          player.x + player.width > powerUpScreenX &&
-          player.y < powerUp.y + 30 &&
-          player.y + player.height > powerUp.y
-        ) {
-          if (powerUp.type === 'health' && totalLives < 5) {
-            totalLives++;
-            createParticles(powerUpScreenX + 15, powerUp.y + 15, 10, '#ff6b6b');
-          }
-          powerUps.splice(i, 1);
-          score += 20;
-        }
-      }
-    }
-    
-    function drawPowerUps() {
-      powerUps.forEach(powerUp => {
-        let screenX = powerUp.x - cameraX;
-        let bobY = powerUp.y + Math.sin(powerUp.bob) * 5;
-        
-        if (powerUp.type === 'health') {
-          if (heartImg.complete && heartImg.naturalWidth !== 0) {
-            ctx.drawImage(heartImg, screenX, bobY, 30, 30);
-          } else {
-            ctx.fillStyle = '#ff6b6b';
-            ctx.fillRect(screenX, bobY, 30, 30);
-            ctx.fillStyle = 'white';
-            ctx.font = '20px Arial';
-            ctx.fillText('❤', screenX + 5, bobY + 22);
-          }
-        }
-      });
-    }
+    // Combo system
+    let combo = 1; let comboTimer = 0; const COMBO_WINDOW = 90; // frames
 
-    function spawnEnemies() {
-      enemies = [];
-      let enemyCount = Math.min(currentLevel + 3, 8); // Lebih banyak harimau
-      
-      for(let i = 0; i < enemyCount; i++) {
-        // Random posisi X dalam range yang luas
-        let randomX = Math.random() * 2000 + 400; // Random antara 400-2400
-        if (Math.random() < 0.3) { // 30% kemungkinan spawn di belakang player
-          randomX = -(Math.random() * 500 + 100); // Random antara -100 sampai -600
-        }
-        
-        enemies.push({
-          worldX: randomX,
-          width: 80,
-          height: 60,
-          y: canvas.height - groundHeight - 60 - grassOffset,
-          hp: Math.min(2 + currentLevel, 5),
-          maxHp: Math.min(2 + currentLevel, 5),
-          speed: 1 + currentLevel * 0.3 + (Math.random() * 0.5), // Random speed juga
-          alive: true
-        });
-      }
-      
-      // Spawn beberapa harimau tambahan di posisi random jauh
-      for(let i = 0; i < Math.min(currentLevel, 4); i++) {
-        let farRandomX = Math.random() * 1500 + 1000; // Random antara 1000-2500
-        if (Math.random() < 0.4) { // 40% kemungkinan spawn di belakang jauh
-          farRandomX = -(Math.random() * 800 + 200); // Random antara -200 sampai -1000
-        }
-        
-        enemies.push({
-          worldX: farRandomX,
-          width: 80,
-          height: 60,
-          y: canvas.height - groundHeight - 60 - grassOffset,
-          hp: Math.min(2 + currentLevel, 5),
-          maxHp: Math.min(2 + currentLevel, 5),
-          speed: 1 + currentLevel * 0.3 + (Math.random() * 0.7), // Speed lebih random
-          alive: true
-        });
-      }
-=======
-    function spawnEnemy() {
-      if (enemies.length >= 3) return;
+    function addCombo(){ combo = Math.min(10, combo+1); comboTimer = COMBO_WINDOW; }
+    function resetCombo(){ combo = 1; comboTimer = 0; }
+
+    // Enemy spawner
+    function spawnEnemy(type='normal'){
+      const isBoss = (type==='boss');
+      const w = isBoss? 200:100; const h = isBoss? 160:80;
+      const hpBase = isBoss? (10+level*3) : (2+level);
+      const spd = isBoss? (1.5+level*0.2) : (1 + Math.random()*(2+level*0.5));
       const enemy = {
-        worldX: cameraX + canvas.width + Math.random() * 600,
-        width: 100,
-        height: 80,
-        y: canvas.height - groundHeight - 80,
-        hp: 3,
-        speed: (Math.random() < 0.5 ? -1 : 1) * (1 + Math.random() * 2)
+        type, boss: isBoss, hp: hpBase, maxHp: hpBase,
+        worldX: cameraX + canvas.width + Math.random()*600,
+        width: w, height: h, y: canvas.height - groundHeight - h,
+        speed: (Math.random()<0.5?-1:1)*spd,
+        attackCD: 0
       };
       enemies.push(enemy);
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
     }
 
-    function resetGame(resetLives = false) {
-      if (resetLives) {
-        totalLives = 5;
-        currentLevel = 1;
-        enemiesDefeated = 0;
-      }
-      
-      cameraX = 0;
-      score = 0;
-      hitCooldown = 0;
-      attackCooldown = 0;
-      gameOver = false;
-      bloodEffect = 0;
-      particles = [];
-      powerUps = [];
-      
-      restartBtn.style.display = "none";
-      attackBtn.style.display = "block";
-<<<<<<< HEAD
-      jumpBtn.style.display = "block";
-      levelDisplay.textContent = `LEVEL ${currentLevel}`;
-=======
-      leaderboardBtn.style.display = "block";
-      enemies = [];
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
+    function spawnWave(){
+      const cap = 3 + level; // increased cap with level
+      while (enemies.length < cap) spawnEnemy('normal');
+      // Boss setiap 3 level
+      if (level % 3 === 0 && !enemies.some(e=>e.boss)) spawnEnemy('boss');
+    }
 
-      player = {
-        x: 200,
-        y: canvas.height - groundHeight - 70 - grassOffset,
-        width: 60,
-        height: 70,
-        dy: 0,
-        speed: 6,
-        jumpPower: -16,
-        gravity: 0.8,
-        onGround: true,
-        attacking: false,
-        hp: 3,
-        maxHp: 3
-      };
-
-<<<<<<< HEAD
-      spawnEnemies();
-      
-      // Add power-ups di posisi random juga
-      for(let i = 0; i < 5; i++) {
-        let randomPowerUpX = Math.random() * 1800 + 600; // Random antara 600-2400
-        createPowerUp(randomPowerUpX, canvas.height - groundHeight - 80, 'health');
-      }
-=======
-      for (let i = 0; i < 2; i++) spawnEnemy();
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
-
+    function resetGame(resetLives=false){
+      if (resetLives) totalLives = 3;
+      cameraX = 0; score = 0; coins = 0; level = 1; nextLevelScore=200; showLevelUp=0;
+      hitCooldown = 0; attackCooldown = 0; gameOver=false; paused=false; bloodEffect=0; invulnTimer=0;
+      player.x = 200; player.y = canvas.height - groundHeight - player.height; player.dy=0; player.onGround=true;
+      player.dashCD=0; player.shieldTimer=0; player.strengthTimer=0; stamina=maxStamina; resetCombo();
+      enemies.length=0; drops.length=0;
+      restartBtn.style.display='none'; attackBtn.style.display='block'; leaderboardBtn.style.display='block';
+      spawnWave();
       gameLoop();
     }
 
-    function nextLevel() {
-      currentLevel++;
-      enemiesDefeated = 0;
-      score += 100 * currentLevel;
-      createParticles(canvas.width/2, canvas.height/2, 20, '#feca57');
-      
-      // Restore some health
-      if (totalLives < 5) totalLives++;
-      
-      levelDisplay.textContent = `LEVEL ${currentLevel}`;
-      spawnEnemies();
-      
-      // Add power-ups di posisi random untuk level baru
-      for(let i = 0; i < 4; i++) {
-        let randomPowerUpX = Math.random() * 1500 + 500; // Random antara 500-2000
-        createPowerUp(randomPowerUpX, canvas.height - groundHeight - 80, 'health');
+    // Drops: coins & powerups
+    function dropFromEnemy(enemy){
+      // coins
+      const n = enemy.boss? 8 : (2+Math.floor(Math.random()*3));
+      for(let i=0;i<n;i++){
+        drops.push({ kind:'coin', x: enemy.worldX + (Math.random()*enemy.width), y: enemy.y, vy: -6 - Math.random()*3, life: 600 });
+      }
+      // chance powerup
+      if (Math.random() < (enemy.boss? 0.8 : 0.12)){
+        const kind = Math.random() < 0.5 ? 'shield' : 'strength';
+        drops.push({ kind, x: enemy.worldX + enemy.width/2, y: enemy.y, vy: -7, life: 900 });
       }
     }
 
-    function update() {
-      if (gameOver) return;
+    // ===== Update =====
+    function update(){
+      if (paused || gameOver) return;
 
-      // Camera movement
-      if (keys["ArrowLeft"]) cameraX -= 8;
-      if (keys["ArrowRight"]) cameraX += 8;
+      // movement
+      if (keys['ArrowLeft'] || holdLeft) cameraX -= player.speed;
+      if (keys['ArrowRight'] || holdRight) cameraX += player.speed;
+      if (keys['Space'] && player.onGround){ player.dy = player.jumpPower; player.onGround=false; }
 
-      // Player jump
-      if (keys["Space"] && player.onGround) {
-        player.dy = player.jumpPower;
-        player.onGround = false;
-        createParticles(player.x + player.width/2, player.y + player.height, 5, '#48dbfb');
-      }
+      // apply gravity to player visual (y is relative to screen height)
+      player.dy += player.gravity; player.y += player.dy;
+      const groundY = canvas.height - groundHeight - player.height;
+      if (player.y >= groundY){ player.y = groundY; player.dy=0; player.onGround=true; }
 
-      // Player physics
-      player.dy += player.gravity;
-      player.y += player.dy;
-<<<<<<< HEAD
-      let groundY = canvas.height - groundHeight - player.height - grassOffset;
-=======
+      // stamina regen
+      stamina = Math.min(maxStamina, stamina + 0.35);
 
-      let groundY = canvas.height - groundHeight - player.height;
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
-      if (player.y >= groundY) {
-        player.y = groundY;
-        player.dy = 0;
-        player.onGround = true;
-      }
+      // timers
+      if (hitCooldown>0) hitCooldown--; if (attackCooldown>0) attackCooldown--; if (player.dashCD>0) player.dashCD--; if (invulnTimer>0) invulnTimer--;
+      if (player.shieldTimer>0) player.shieldTimer--; if (player.strengthTimer>0) player.strengthTimer--;
+      if (comboTimer>0){ comboTimer--; if (comboTimer===0) resetCombo(); }
 
-<<<<<<< HEAD
-      // Attack logic
-=======
-      enemies.forEach(enemy => {
+      // enemies move & collide
+      enemies.forEach(enemy=>{
         enemy.y = canvas.height - groundHeight - enemy.height;
         enemy.worldX += enemy.speed;
-        if (enemy.worldX < cameraX - 200) enemy.speed *= -1;
-        if (enemy.worldX > cameraX + canvas.width + 200) enemy.speed *= -1;
+        if (enemy.worldX < cameraX - 250) enemy.speed = Math.abs(enemy.speed);
+        if (enemy.worldX > cameraX + canvas.width + 250) enemy.speed = -Math.abs(enemy.speed);
+        if (enemy.attackCD>0) enemy.attackCD--;
       });
 
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
-      if (player.attacking) {
-        let attackRange = {
-          x: player.x + player.width,
-          y: player.y,
-          width: 50,
-          height: player.height
-        };
-        enemies.forEach(enemy => {
-          if (!enemy.alive) return;
-          
-          let enemyScreenX = enemy.worldX - cameraX;
-          
-          if (
-            attackRange.x < enemyScreenX + enemy.width &&
-            attackRange.x + attackRange.width > enemyScreenX &&
-            attackRange.y < enemy.y + enemy.height &&
-            attackRange.y + attackRange.height > enemy.y
-          ) {
-            enemy.hp -= 1;
-            player.attacking = false;
-            createParticles(enemyScreenX + enemy.width/2, enemy.y + enemy.height/2, 8, '#ff6b6b');
-            
-            if (enemy.hp <= 0) {
-              enemy.alive = false;
-              score += 50 + currentLevel * 10;
-              enemiesDefeated++;
-              createParticles(enemyScreenX + enemy.width/2, enemy.y + enemy.height/2, 15, '#feca57');
+      // attack box
+      if (player.attacking){
+        const rangeW = 50 + (player.strengthTimer>0? 20:0);
+        const atk = { x: (player.facing===1? player.x+player.width : player.x - rangeW), y: player.y, width: rangeW, height: player.height };
+        for (const enemy of enemies){
+          const ex = enemy.worldX - cameraX;
+          if (rectsOverlap(atk, {x:ex,y:enemy.y,width:enemy.width,height:enemy.height})){
+            const dmg = (player.strengthTimer>0? 2:1) * player.damage;
+            enemy.hp -= dmg * combo; // combo mempengaruhi damage
+            // combo gain
+            addCombo();
+            // sound
+            hitSound.currentTime=0; hitSound.play().catch(()=>{});
+            // slight knockback
+            enemy.worldX += player.facing*12;
+            if (enemy.hp <= 0){
+              score += (enemy.boss? 300:50) * combo; // reward with combo
+              killSound.currentTime=0; killSound.play().catch(()=>{});
+              dropFromEnemy(enemy);
             }
           }
-        });
+        }
+        // end attack this frame
+        player.attacking=false;
       }
 
-<<<<<<< HEAD
-      // Enemy AI and collision
-=======
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
-      enemies.forEach(enemy => {
-        if (!enemy.alive) return;
-        
-        let enemyScreenX = enemy.worldX - cameraX;
-        
-        // Simple AI - move towards player
-        if (enemyScreenX > player.x + player.width + 100) {
-          enemy.worldX -= enemy.speed;
-        } else if (enemyScreenX + enemy.width < player.x - 100) {
-          enemy.worldX += enemy.speed;
-        }
-        
-        // Collision with player
-        if (
-          player.x < enemyScreenX + enemy.width &&
-          player.x + player.width > enemyScreenX &&
-          player.y < enemy.y + enemy.height &&
-          player.y + player.height > enemy.y
-        ) {
-          if (hitCooldown <= 0) {
-<<<<<<< HEAD
-            bloodEffect = 60;
-            hitCooldown = 90;
-            createParticles(player.x + player.width/2, player.y + player.height/2, 10, '#ff0000');
-            totalLives--;
-            
-            if (totalLives <= 0) {
-              gameOver = true;
-              restartBtn.style.display = "block";
-              attackBtn.style.display = "none";
-              jumpBtn.style.display = "none";
-              restartBtn.textContent = "🔄 Main Lagi";
-=======
-            bloodEffect++;
-            hitCooldown = 60;
-            if (bloodEffect >= 3) {
-              totalLives--;
-              bloodEffect = 0;
-              if (totalLives <= 0) {
-                gameOver = true;
-                restartBtn.style.display = "block";
-                attackBtn.style.display = "none";
-              } else {
-                gameOver = true;
-                restartBtn.style.display = "block";
-                attackBtn.style.display = "none";
+      // remove dead enemies
+      enemies = enemies.filter(e=> e.hp>0);
+
+      // player vs enemy hurt
+      for (const enemy of enemies){
+        const ex = enemy.worldX - cameraX;
+        if (rectsOverlap({x:player.x,y:player.y,width:player.width,height:player.height}, {x:ex,y:enemy.y,width:enemy.width,height:enemy.height})){
+          if (invulnTimer<=0 && hitCooldown<=0){
+            if (player.shieldTimer>0){
+              // consume shield instead of life
+              player.shieldTimer = 0; invulnTimer = 20; // brief i-frames
+            } else {
+              bloodEffect++; hitCooldown = 50; invulnTimer = 25; resetCombo();
+              try{ hurtSound.currentTime=0; hurtSound.play(); }catch{}
+              if (bloodEffect >= 3){
+                totalLives--; bloodEffect = 0;
+                if (totalLives <= 0){
+                  gameOver = true; attackBtn.style.display='none'; restartBtn.style.display='block';
+                } else {
+                  // mini-stun
+                  player.dy = -8; player.onGround=false;
+                }
               }
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
             }
           }
         }
-      });
-
-      // Check if level completed
-      if (enemiesDefeated >= enemies.filter(e => e.alive).length && enemies.length > 0) {
-        nextLevel();
       }
 
-      // Update systems
-      updateParticles();
-      updatePowerUps();
+      // spawn control
+      if (Math.random() < 0.006 && enemies.length < (3+level)) spawnEnemy('normal');
 
-      // Update cooldowns
-      if (hitCooldown > 0) hitCooldown--;
-      if (attackCooldown > 0) attackCooldown--;
-      if (bloodEffect > 0) bloodEffect--;
-    }
+      // drop physics (simple float & fall)
+      for (const d of drops){ d.vy += 0.4; d.y += d.vy; if (d.y > canvas.height - groundHeight - 20){ d.y = canvas.height - groundHeight - 20; d.vy *= -0.35; } d.life--; }
+      drops = drops.filter(d=> d.life>0);
 
-<<<<<<< HEAD
-    // Original background image
-    const bg = new Image();
-    bg.src = "Latar1.PNG"; 
-
-    function drawBackground() {
-      // Use original background image like in original game
-      let bgWidth = canvas.width;
-      let offsetX = -cameraX % bgWidth;
-      if (offsetX > 0) offsetX -= bgWidth;
-      
-      if (bg.complete && bg.naturalWidth !== 0) {
-        ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
-        ctx.drawImage(bg, offsetX + bgWidth, 0, bgWidth, canvas.height);
-      } else {
-        // Fallback if image not loaded
-        let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#87CEEB');
-        gradient.addColorStop(1, '#98FB98');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-    }
-
-    function drawPlayer() {
-      // Use original knight.png sprite
-      if (playerImg.complete && playerImg.naturalWidth !== 0) {
-        // Add glow effect while keeping original sprite
-        if (hitCooldown > 0) {
-          ctx.shadowColor = '#ff0000';
-          ctx.shadowBlur = 15;
-        } else {
-          ctx.shadowColor = '#48dbfb';
-          ctx.shadowBlur = 8;
-        }
-        
-        // Apply transparency when hit
-        if (hitCooldown > 0 && hitCooldown % 10 > 5) {
-          ctx.globalAlpha = 0.5;
-        }
-        
-        ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-        ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
-      } else {
-        // Fallback colored rectangle if image not loaded
-        ctx.fillStyle = hitCooldown > 0 && hitCooldown % 10 > 5 ? 'rgba(65,105,225,0.7)' : '#4169E1';
-        ctx.fillRect(player.x, player.y, player.width, player.height);
-      }
-    }
-
-    function drawEnemies() {
-      enemies.forEach(enemy => {
-        if (!enemy.alive) return;
-        
-        let enemyScreenX = enemy.worldX - cameraX;
-        
-        // Use original tiger.png sprite
-        if (enemyImg.complete && enemyImg.naturalWidth !== 0) {
-          ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
-        } else {
-          // Fallback colored rectangle if image not loaded
-          ctx.fillStyle = '#FF4500';
-          ctx.fillRect(enemyScreenX, enemy.y, enemy.width, enemy.height);
-        }
-        
-        // HP bar (same as original)
-        ctx.fillStyle = 'red';
-        ctx.fillRect(enemyScreenX, enemy.y - 20, enemy.width, 10);
-        ctx.fillStyle = 'lime';
-        ctx.fillRect(enemyScreenX, enemy.y - 20, (enemy.hp / enemy.maxHp) * enemy.width, 10);
-      });
-    }
-
-    function drawUI() {
-      // Score
-      ctx.shadowColor = 'black';
-      ctx.shadowBlur = 3;
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 28px Orbitron';
-      ctx.fillText(`Score: ${score}`, 30, 50);
-      
-      // Lives (using original heart.png)
-      for (let i = 0; i < totalLives; i++) {
-        if (heartImg.complete && heartImg.naturalWidth !== 0) {
-          ctx.drawImage(heartImg, 30 + i * 40, 70, 30, 30);
-        } else {
-          ctx.fillStyle = 'red';
-          ctx.font = '30px Arial';
-          ctx.fillText('❤', 30 + i * 40, 95);
+      // collect
+      for (const d of drops){
+        const dx = (d.x - cameraX) - (player.x + player.width/2);
+        const dy = d.y - (player.y + player.height/2);
+        const dist = Math.hypot(dx,dy);
+        if (dist < 50){
+          if (d.kind==='coin'){ coins++; score += 5; d.life=0; if (coins % 20 === 0 && totalLives < 5) totalLives++; }
+          else if (d.kind==='shield'){ player.shieldTimer = 60*8; d.life=0; }
+          else if (d.kind==='strength'){ player.strengthTimer = 60*8; d.life=0; }
         }
       }
-      
-      // Attack range visualization (same as original)
-      if (player.attacking) {
-        ctx.fillStyle = 'rgba(255,0,0,0.5)';
-        ctx.fillRect(player.x + player.width, player.y, 50, player.height);
-      }
-      
-      // Blood effect
-      if (bloodEffect > 0) {
-        ctx.fillStyle = `rgba(255,0,0,${bloodEffect/100})`;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-      
-      // Level progress
-      let aliveEnemies = enemies.filter(e => e.alive).length;
-      if (aliveEnemies > 0) {
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(canvas.width - 250, 20, 220, 40);
-        ctx.fillStyle = '#feca57';
-        ctx.font = 'bold 18px Orbitron';
-        ctx.fillText(`Enemies: ${aliveEnemies}`, canvas.width - 240, 45);
-      }
-=======
-      if (Math.random() < 0.005 && enemies.length < 3) spawnEnemy();
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
+      drops = drops.filter(d=> d.life>0);
+
+      // level up
+      if (score >= nextLevelScore){ level++; nextLevelScore += 250; showLevelUp = 100; spawnWave(); }
+
+      // update HUD
+      scoreText.textContent = Math.floor(score);
+      levelText.textContent = level;
+      comboText.textContent = 'x'+combo;
+      staminaFill.style.width = (100*stamina/maxStamina)+'%';
+      coinText.textContent = coins;
     }
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      drawBackground();
-      drawParticles();
-      drawPowerUps();
-      drawPlayer();
-      drawEnemies();
-      drawUI();
+    function rectsOverlap(a,b){ return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y; }
 
-<<<<<<< HEAD
-=======
-      let bgWidth = canvas.width;
-      let offsetX = -cameraX % bgWidth;
-      if (offsetX > 0) offsetX -= bgWidth;
+    // ===== Draw =====
+    function draw(){
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+
+      // parallax-ish: tile bg horizontally
+      const bgWidth = canvas.width; let offsetX = -cameraX % bgWidth; if (offsetX>0) offsetX -= bgWidth;
       ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
-      ctx.drawImage(bg, offsetX + bgWidth, 0, bgWidth, canvas.height);
+      ctx.drawImage(bg, offsetX+bgWidth, 0, bgWidth, canvas.height);
 
+      // player
+      ctx.save();
       ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+      // shield aura
+      if (player.shieldTimer>0){ ctx.strokeStyle = 'rgba(173,216,230,.85)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.roundRect(player.x-6, player.y-6, player.width+12, player.height+12, 10); ctx.stroke(); }
+      // attack flash (brief)
+      if (attackCooldown>0 && attackCooldown>12){ ctx.fillStyle='rgba(255,255,0,.15)'; const w=60; const x=(player.facing===1? player.x+player.width : player.x-w); ctx.fillRect(x, player.y+10, w, player.height-20); }
+      ctx.restore();
 
-      enemies.forEach(enemy => {
-        let enemyScreenX = enemy.worldX - cameraX;
-        if (enemy.hp > 0) {
-          ctx.drawImage(enemyImg, enemyScreenX, enemy.y, enemy.width, enemy.height);
-          ctx.fillStyle = "red";
-          ctx.fillRect(enemyScreenX, enemy.y - 20, enemy.width, 10);
-          ctx.fillStyle = "lime";
-          ctx.fillRect(enemyScreenX, enemy.y - 20, (enemy.hp / 3) * enemy.width, 10);
-        }
-      });
-
-      if (player.attacking) {
-        ctx.fillStyle = "rgba(255,0,0,0.5)";
-        ctx.fillRect(player.x + player.width, player.y, 40, player.height);
+      // enemies
+      for (const e of enemies){
+        const ex = e.worldX - cameraX;
+        const img = (e.boss && bossImg.complete && bossImg.naturalWidth)? bossImg : enemyImg;
+        ctx.drawImage(img, ex, e.y, e.width, e.height);
+        // hp bar
+        ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(ex, e.y-18, e.width, 10);
+        ctx.fillStyle = e.boss? '#ff4d4d' : '#3ddc84';
+        ctx.fillRect(ex, e.y-18, Math.max(0, (e.hp/e.maxHp))*e.width, 10);
       }
 
-      ctx.fillStyle = "white";
-      ctx.font = "24px Arial Black";
-      ctx.fillText("Score: " + score, 20, 40);
-
-      ctx.font = "40px Arial Black";
-      ctx.fillText("LEVEL 0", 20, 80);
-
-      for (let i = 0; i < totalLives; i++) {
-        if (heartImg.complete && heartImg.naturalWidth !== 0) {
-          ctx.drawImage(heartImg, canvas.width - (i + 1) * 40, 20, 30, 30);
-        } else {
-          ctx.fillStyle = "red";
-          ctx.font = "30px Arial";
-          ctx.fillText("❤", canvas.width - (i + 1) * 40, 45);
-        }
+      // drops
+      for (const d of drops){
+        const dx = d.x - cameraX;
+        let img = null; if (d.kind==='coin') img = coinImg; else if (d.kind==='shield') img = shieldImg; else if (d.kind==='strength') img = strengthImg;
+        if (img && img.complete && img.naturalWidth) ctx.drawImage(img, dx-12, d.y-12, 24, 24);
+        else { ctx.fillStyle = d.kind==='coin' ? 'gold' : (d.kind==='shield'?'skyblue':'tomato'); ctx.beginPath(); ctx.arc(dx, d.y, 10, 0, Math.PI*2); ctx.fill(); }
       }
 
-      if (bloodEffect > 0) {
-        ctx.fillStyle = "rgba(255,0,0,0.3)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // blood vignette
+      if (bloodEffect>0){ ctx.fillStyle = 'rgba(255,0,0,0.22)'; ctx.fillRect(0,0,canvas.width, canvas.height); }
+
+      // HUD hearts (right top)
+      for (let i=0;i<totalLives;i++){
+        const x = canvas.width - (i+1)*40; const y = 16;
+        if (heartImg.complete && heartImg.naturalWidth) ctx.drawImage(heartImg, x, y, 30, 30);
+        else { ctx.fillStyle = 'red'; ctx.font = '26px Arial'; ctx.fillText('❤', x+6, y+26); }
       }
 
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
-      if (gameOver) {
-        // Game Over screen
-        ctx.fillStyle = 'rgba(0,0,0,0.8)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.shadowColor = 'red';
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = '#ff6b6b';
-        ctx.font = 'bold 60px Creepster';
-        ctx.textAlign = 'center';
+      // level up banner
+      if (showLevelUp>0){
+        ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(canvas.width/2-180, 60, 360, 64);
+        ctx.fillStyle = 'yellow'; ctx.font = '42px Arial Black'; ctx.textAlign='center';
+        ctx.fillText('LEVEL UP!', canvas.width/2, 104); ctx.textAlign='start';
+        showLevelUp--; }
+
+      // game over text
+      if (gameOver){
+        ctx.fillStyle = 'red'; ctx.font = '60px Arial Black'; ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 50);
-        
-        ctx.shadowBlur = 5;
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 24px Orbitron';
-        ctx.fillText(`Final Score: ${score}`, canvas.width/2, canvas.height/2 + 20);
-        ctx.fillText(`Level Reached: ${currentLevel}`, canvas.width/2, canvas.height/2 + 60);
-        
-        ctx.textAlign = 'left';
+        ctx.textAlign='start'; ctx.textBaseline='alphabetic';
       }
     }
 
-    function gameLoop() {
-      update();
-      draw();
-      if (!gameOver) {
-        requestAnimationFrame(gameLoop);
-      } else {
-        requestAnimationFrame(draw);
-      }
+    // ===== Loop =====
+    function gameLoop(){
+      update(); draw();
+      requestAnimationFrame(gameLoop);
     }
 
-    restartBtn.addEventListener("click", () => {
-      resetGame(totalLives <= 0);
-    });
+    // ===== Buttons & Menu =====
+    function toggleHowTo(){ const el = document.getElementById('howto'); el.style.display = el.style.display==='none' ? 'block':'none'; }
 
-<<<<<<< HEAD
-    // Start the game
-    window.onload = () => {
-      setTimeout(() => resetGame(true), 100);
-    };
-=======
-    // 🔥 fungsi mulai game dari menu
-    function startGame() {
-      mainMenu.style.display = "none"; // hilangin menu awal
-      resetGame(); // mulai game
+    function startGame(){
+      mainMenu.style.display='none'; restartBtn.style.display='none'; attackBtn.style.display='block'; leaderboardBtn.style.display='block';
+      totalLives = 3; resetGame();
     }
->>>>>>> 4d8c4f379d2abfe4324772baea6b9f525fa2257c
+    function togglePause(){ if (gameOver) return; paused = !paused; pauseOverlay.style.display = paused? 'flex':'none'; }
+    function resumeGame(){ paused=false; pauseOverlay.style.display='none'; }
+    function restartFromPause(){ paused=false; pauseOverlay.style.display='none'; resetGame(true); }
+    function backToMenu(){ paused=false; gameOver=true; pauseOverlay.style.display='none'; mainMenu.style.display='flex'; attackBtn.style.display='none'; }
+
+    restartBtn.addEventListener('click', ()=>{ if (totalLives>0) resetGame(); else resetGame(true); });
+
+    // expose some for console debug
+    window.__game = { enemies, drops, player };
   </script>
 </body>
 </html>
