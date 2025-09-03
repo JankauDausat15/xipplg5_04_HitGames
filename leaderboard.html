@@ -10,15 +10,15 @@
       color: white;
       text-align: center;
       padding: 20px;
+      margin: 0;
     }
-
     h1 {
       margin-bottom: 20px;
       font-size: 2.5rem;
     }
-
     table {
       width: 80%;
+      max-width: 800px;
       margin: auto;
       border-collapse: collapse;
       background: rgba(255, 255, 255, 0.1);
@@ -26,30 +26,30 @@
       overflow: hidden;
       box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
     }
-
     th, td {
       padding: 12px;
       font-size: 1.2rem;
     }
-
     th {
       background: rgba(0,0,0,0.5);
     }
-
     tr:nth-child(even) {
       background: rgba(255, 255, 255, 0.1);
     }
-
     .back-btn {
-      display: block;
-      margin-top: 20px;
-      color: white;
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 20px;
+      background: gold;
+      color: #333;
       text-decoration: none;
       font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: transform 0.2s;
     }
-
     .back-btn:hover {
-      text-decoration: underline;
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -63,55 +63,27 @@
         <th>Player</th>
         <th>Score</th>
       </tr>
-      <h2>Tambah Skor Manual</h2>
-<div style="margin:20px;">
-  <input id="nameInput" type="text" placeholder="Nama Pemain" 
-         style="padding:8px; border-radius:6px; border:none;"/>
-  <input id="scoreInput" type="number" placeholder="Skor" 
-         style="padding:8px; border-radius:6px; border:none; width:120px;"/>
-  <button onclick="manualAddScore()" 
-          style="padding:8px 16px; border:none; border-radius:6px; background:gold; font-weight:bold; cursor:pointer;">
-    ➕ Tambah
-  </button>
-</div>
-
     </thead>
     <tbody>
-      <!-- Top 10 Player masuk sini -->
-    </tbody>
+      </tbody>
   </table>
 
-  <a href="backgroud.html" class="back-btn">⬅ Back to Game</a>
+  <a href="backgroud.html" class="back-btn">⬅ Kembali ke Game</a>
 
-  <script>
-   let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+<script>
     // ✅ Fungsi untuk menampilkan leaderboard
-
-
-    function manualAddScore(){
-  let name = document.getElementById("nameInput").value.trim();
-  let score = parseInt(document.getElementById("scoreInput").value);
-
-  if(!name || isNaN(score)){
-    alert("Masukkan nama dan skor yang valid!");
-    return;
-  }
-
-  leaderboard.push({ name, score });
-  localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-  renderLeaderboard();
-
-  // reset input
-  document.getElementById("nameInput").value = "";
-  document.getElementById("scoreInput").value = "";
-}
-
     function renderLeaderboard() {
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
       leaderboard.sort((a, b) => b.score - a.score);
       let top10 = leaderboard.slice(0, 10);
 
       let tableBody = document.querySelector("#leaderboard tbody");
       tableBody.innerHTML = "";
+      
+      if (top10.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="3">Belum ada skor. Jadilah yang pertama!</td></tr>`;
+        return;
+      }
 
       top10.forEach((player, index) => {
         let medal = "";
@@ -128,19 +100,8 @@
       });
     }
 
-    // ✅ Fungsi untuk menambahkan skor otomatis dari game
-    function addScore(name, score) {
-      leaderboard.push({ name, score });
-      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-      renderLeaderboard();
-    }
-
-    // Render awal
+    // Render leaderboard saat halaman dimuat
     renderLeaderboard();
-
-    // --- Contoh: simulasi otomatis (hapus ini di game asli) ---
-    // addScore("Player1", 150);
-    // addScore("Player2", 200);
-  </script>
+</script>
 </body>
 </html>
