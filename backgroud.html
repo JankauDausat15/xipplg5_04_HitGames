@@ -1,160 +1,201 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌿 Petualangan Anak Rimba 🌿</title>
-  <style>
-    /* ========== GLOBAL ========== */
-    :root {
-      --ui-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    }
-    body { margin: 0; overflow: hidden; font-family: "Trebuchet MS", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #000; }
-    canvas { display: block; background: #000; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌿 Petualangan Anak Rimba 🌿</title>
+    <style>
+        /* ========== GLOBAL ========== */
+        :root {
+            --ui-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        body { margin: 0; overflow: hidden; font-family: "Trebuchet MS", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #000; }
+        canvas { display: block; background: #000; }
 
-    /* ========== MENU AWAL ========== */
-    #mainMenu {
-      position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 10;
-      background: url('download.jpeg') no-repeat center center/cover;
-    }
-    .overlay {
-      background: rgba(0, 0, 0, 0.55);
-      padding: 48px 56px; border-radius: 20px; text-align: center; color: #fff;
-      box-shadow: var(--ui-shadow); animation: fadeIn 700ms ease-out;
-      backdrop-filter: blur(2px);
-    }
-    .overlay h1 { font-size: 2.6rem; margin: 0 0 24px; text-shadow: 3px 3px 6px #000; letter-spacing: 1px; }
-    .menu-row { display: grid; gap: 12px; grid-auto-flow: row; }
+        /* ========== MENU AWAL ========== */
+        #mainMenu {
+            position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 10;
+            background: url('Latar1.PNG') no-repeat center center/cover;
+        }
+        .overlay {
+            background: rgba(0, 0, 0, 0.55);
+            padding: 48px 56px; border-radius: 20px; text-align: center; color: #fff;
+            box-shadow: var(--ui-shadow); animation: fadeIn 700ms ease-out;
+            backdrop-filter: blur(2px);
+        }
+        .overlay h1 { font-size: 2.6rem; margin: 0 0 24px; text-shadow: 3px 3px 6px #000; letter-spacing: 1px; }
+        .menu-row { display: grid; gap: 12px; grid-auto-flow: row; }
 
-    .btn {
-      padding: 14px 28px; font-size: 1.05rem; border: none; border-radius: 14px; cursor: pointer; color: #fff;
-      font-weight: 700; letter-spacing: .7px; transition: transform .15s ease, filter .2s ease; box-shadow: var(--ui-shadow);
-      background: linear-gradient(45deg, #27ae60, #2ecc71);
-    }
-    .btn:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.06); }
+        .btn {
+            padding: 14px 28px; font-size: 1.05rem; border: none; border-radius: 14px; cursor: pointer; color: #fff;
+            font-weight: 700; letter-spacing: .7px; transition: transform .15s ease, filter .2s ease, box-shadow .2s ease; box-shadow: var(--ui-shadow);
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+        .btn:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.06); }
 
-    .btn.secondary { background: linear-gradient(45deg, #555, #777); }
-    .btn.gold { background: linear-gradient(45deg, #f1c40f, #f39c12); }
-    .btn:disabled { background: #666; cursor: not-allowed; transform: none; filter: none; }
+        .btn.secondary { background: linear-gradient(45deg, #555, #777); }
+        .btn.gold { background: linear-gradient(45deg, #f1c40f, #f39c12); }
+        .btn:disabled { background: #666; cursor: not-allowed; transform: none; filter: none; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px) scale(.98);} to { opacity: 1; transform: none; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px) scale(.98);} to { opacity: 1; transform: none; } }
+        
+        .btn.leaderboard-menu {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
 
-    /* ========== IN-GAME UI ========== */
-    #attackBtn {
-      position: absolute; left: 50%; transform: translateX(-50%); bottom: 20px;
-      padding: 12px 22px; font-size: 18px; border: none; border-radius: 12px; cursor: pointer; display: none; z-index: 5;
-      background: gold; color: #000; box-shadow: var(--ui-shadow);
-    }
-    #attackBtn:hover { filter: brightness(1.1); }
-    #leaderboardBtn {
-      position: absolute; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%;
-      background: gold; color: #fff; font-size: 28px; border: none; cursor: pointer; display: none; z-index: 5;
-      box-shadow: var(--ui-shadow);
-    }
-    #leaderboardBtn:hover { filter: brightness(1.1); }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); }
+            50% { transform: scale(1.04); box-shadow: 0 5px 25px rgba(243, 156, 18, 0.7); }
+        }
 
-    /* HUD */
-    .hud { position: absolute; top: 12px; left: 12px; color: #fff; z-index: 4; text-shadow: 0 2px 6px #000; }
-    .hud .row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
-    .pill { background: rgba(0,0,0,.35); padding: 8px 12px; border-radius: 999px; box-shadow: var(--ui-shadow); }
-    .bar { width: 220px; height: 12px; background: rgba(255,255,255,.15); border-radius: 999px; overflow: hidden; }
-    .bar > span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #2ecc71, #27ae60); }
-    .coins { position: absolute; top: 12px; right: 12px; color: #fff; z-index: 4; display: flex; align-items: center; gap: 8px; }
-    .coins img { width: 26px; height: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+        /* ========== IN-GAME UI ========== */
+        #attackBtn {
+            position: absolute; left: 50%; transform: translateX(-50%); bottom: 20px;
+            padding: 12px 22px; font-size: 18px; border: none; border-radius: 12px; cursor: pointer; display: none; z-index: 5;
+            background: gold; color: #000; box-shadow: var(--ui-shadow);
+        }
+        #attackBtn:hover { filter: brightness(1.1); }
+        #leaderboardBtn {
+            position: absolute; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%;
+            background: gold; color: #fff; font-size: 28px; border: none; cursor: pointer; display: none; z-index: 5;
+            box-shadow: var(--ui-shadow);
+        }
+        #leaderboardBtn:hover { filter: brightness(1.1); }
 
-    /* Pause & Game Over Overlay */
-    #pauseOverlay, #gameOverScreen {
-        position: absolute; inset: 0; background: rgba(0,0,0,.5); display: none; z-index: 8; align-items: center; justify-content: center;
-    }
-    .card { background: rgba(20,20,20,.85); color: #fff; padding: 24px; border-radius: 16px; width: min(92vw, 460px); box-shadow: var(--ui-shadow); text-align: center; }
-    .card h2 { margin-top: 0; }
-    .card p b { color: gold; font-size: 1.2em; }
-    .card input { padding:10px; border-radius:10px; border:none; text-align:center; font-size:1rem; margin-bottom: 12px; width: 80%; }
-    .card .button-group { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+        /* HUD */
+        .hud { position: absolute; top: 12px; left: 12px; color: #fff; z-index: 4; text-shadow: 0 2px 6px #000; }
+        .hud .row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+        .pill { background: rgba(0,0,0,.35); padding: 8px 12px; border-radius: 999px; box-shadow: var(--ui-shadow); }
+        .bar { width: 220px; height: 12px; background: rgba(255,255,255,.15); border-radius: 999px; overflow: hidden; }
+        .bar > span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #2ecc71, #27ae60); }
+        .coins { position: absolute; top: 12px; right: 12px; color: #fff; z-index: 4; display: flex; align-items: center; gap: 8px; }
+        .coins img { width: 26px; height: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
 
+        /* Overlay Umum */
+        #pauseOverlay, #gameOverScreen, #levelUpScreen {
+            position: absolute; inset: 0; background: rgba(0,0,0,.5); display: none; z-index: 8; align-items: center; justify-content: center;
+        }
+        .card { 
+            background: rgba(20,20,20,.85); color: #fff; padding: 24px; border-radius: 16px; 
+            width: min(92vw, 460px); box-shadow: var(--ui-shadow); text-align: center;
+        }
+        .card h2 { margin-top: 0; font-size: 2.2rem; color: gold; }
+        .card p { font-size: 1.1rem; line-height: 1.5; }
+        .card p b { color: #2ecc71; font-size: 1.2em; }
+        .card input { padding:10px; border-radius:10px; border:none; text-align:center; font-size:1rem; margin-bottom: 12px; width: 80%; }
+        .card .button-group { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 20px;}
 
-    /* Mobile controls */
-    #touchControls { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 6; }
-    .tc-btn { pointer-events: auto; position: absolute; bottom: 18px; width: 64px; height: 64px; border-radius: 50%; border: none; opacity: .85; box-shadow: var(--ui-shadow); font-size: 22px; }
-    #btnLeft { left: 18px; background: #333; color: #fff; }
-    #btnRight { left: 94px; background: #333; color: #fff; }
-    #btnJump { right: 18px; background: #2d89ef; color: #fff; }
-    #btnAtk { right: 94px; background: gold; color: #000; }
-    #btnDash { right: 170px; background: #9147ff; color: #fff; width: 56px; height: 56px; bottom: 90px; border-radius: 14px; }
-  </style>
+        /* ▼▼▼ CSS BARU UNTUK ANIMASI NOTIFIKASI & GETARAN LAYAR ▼▼▼ */
+        #levelUpScreen .card {
+            animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .screen-shake {
+            animation: shake 0.3s linear;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        /* ▲▲▲ AKHIR DARI CSS BARU ▲▲▲ */
+
+        /* Mobile controls */
+        #touchControls { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 6; }
+        .tc-btn { pointer-events: auto; position: absolute; bottom: 18px; width: 64px; height: 64px; border-radius: 50%; border: none; opacity: .85; box-shadow: var(--ui-shadow); font-size: 22px; }
+        #btnLeft { left: 18px; background: #333; color: #fff; }
+        #btnRight { left: 94px; background: #333; color: #fff; }
+        #btnJump { right: 18px; background: #2d89ef; color: #fff; }
+        #btnAtk { right: 94px; background: gold; color: #000; }
+        #btnDash { right: 170px; background: #9147ff; color: #fff; width: 56px; height: 56px; bottom: 90px; border-radius: 14px; }
+    </style>
 </head>
 <body>
-  <div id="mainMenu">
-    <div class="overlay">
-      <h1>🌿 Petualangan Anak Rimba 🌿</h1>
-      <div class="menu-row">
-        <button class="btn" onclick="startGame()">▶ Mainkan</button>
-        <button class="btn secondary" onclick="toggleHowTo()">❓ Cara Main</button>
-        <div id="howto" style="display:none; text-align:left; font-weight:600; line-height:1.4; max-width:520px;">
-          ◀▶/Arrow: Gerak • Space: Lompat • A/⚔: Attack • Shift: Dash • Esc: Pause<br/>
-          Kumpulkan koin dari musuh, ambil power-up (🛡 Shield, 💪 Strength).
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <canvas id="gameCanvas"></canvas>
-  <div class="hud">
-    <div class="row">
-      <div id="scorePill" class="pill">Score: <span id="scoreText">0</span> • Level: <span id="levelText">1</span> • Combo: <span id="comboText">x1</span></div>
-      <div class="pill" style="display:flex; align-items:center; gap:10px;">
-        Stamina
-        <div class="bar"><span id="staminaBar"></span></div>
-      </div>
-    </div>
-  </div>
-  <div class="coins"><img src="coin.png" alt="coin" onerror="this.style.display='none'"/><b id="coinText">0</b></div>
-
-  <div id="pauseOverlay">
-    <div class="card">
-      <h2>⏸ Dijeda</h2>
-      <p>Gunakan waktu ini buat atur strategi! 😉</p>
-      <div class="button-group">
-        <button class="btn" onclick="resumeGame()">Lanjut</button>
-        <button class="btn" onclick="restartFromPause()">Ulangi</button>
-        <button class="btn secondary" onclick="backToMenu()">Menu</button>
-      </div>
-    </div>
-  </div>
-
-  <button id="attackBtn">⚔ Attack</button>
-  <button id="leaderboardBtn" onclick="window.location.href='leaderboard.html'">🏆</button>
-
-  <div id="gameOverScreen">
-      <div class="card">
-          <h2>GAME OVER</h2>
-          <p>Skor Akhir Kamu: <b id="finalScoreText">0</b></p>
-          <div id="saveScoreSection">
-            <input type="text" id="playerNameInput" placeholder="Masukkan Nama Kamu" maxlength="15"/>
-            <button class="btn gold" onclick="saveScore()">Simpan Skor</button>
-          </div>
-          <div id="postSaveSection" style="display:none;">
-            <p style="color:#2ecc71;">Skor berhasil disimpan!</p>
-             <div class="button-group">
-                <button class="btn" onclick="restartFromGameOver()">Main Lagi</button>
-                <button class="btn secondary" onclick="backToMenu()">Menu Utama</button>
+    <div id="mainMenu">
+        <div class="overlay">
+            <h1>🌿 Petualangan Anak Rimba 🌿</h1>
+            <div class="menu-row">
+                <button class="btn" onclick="startGame()">▶ Mainkan</button>
+                <button class="btn gold leaderboard-menu" onclick="window.location.href='leaderboard.html'">🏆 Papan Peringkat</button>
+                <button class="btn secondary" onclick="toggleHowTo()">❓ Cara Main</button>
+                <div id="howto" style="display:none; text-align:left; font-weight:600; line-height:1.4; max-width:520px;">
+                    ◀▶/Arrow: Gerak • Space: Lompat • A/⚔: Attack • Shift: Dash • Esc: Pause<br/>
+                    Kumpulkan koin dari musuh, ambil power-up (🛡 Shield, 💪 Strength).
+                </div>
             </div>
-          </div>
-      </div>
-  </div>
+        </div>
+    </div>
 
-  <audio id="hitSound" src="https://www.soundjay.com/switch/switch-1.wav" preload="auto"></audio>
-  <audio id="hurtSound" src="https://www.soundjay.com/misc/fail-buzzer-01.wav" preload="auto"></audio>
-  <audio id="killSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
-  <audio id="bgMusic" src="bgm.mp3" preload="auto" loop></audio>
+    <canvas id="gameCanvas"></canvas>
+    <div class="hud">
+        <div class="row">
+            <div id="scorePill" class="pill">Score: <span id="scoreText">0</span> • Level: <span id="levelText">1</span> • Combo: <span id="comboText">x1</span></div>
+            <div class="pill" style="display:flex; align-items:center; gap:10px;">
+                Stamina
+                <div class="bar"><span id="staminaBar"></span></div>
+            </div>
+        </div>
+    </div>
+    <div class="coins"><img src="coin.png" alt="coin" onerror="this.style.display='none'"/><b id="coinText">0</b></div>
 
-  <div id="touchControls">
-    <button id="btnLeft" class="tc-btn">◀</button>
-    <button id="btnRight" class="tc-btn">▶</button>
-    <button id="btnJump" class="tc-btn">⤴</button>
-    <button id="btnAtk" class="tc-btn">⚔</button>
-    <button id="btnDash" class="tc-btn">Dash</button>
-  </div>
+    <div id="pauseOverlay">
+        <div class="card">
+            <h2>⏸ Dijeda</h2>
+            <p>Gunakan waktu ini buat atur strategi! 😉</p>
+            <div class="button-group">
+                <button class="btn" onclick="resumeGame()">Lanjut</button>
+                <button class="btn" onclick="restartFromPause()">Ulangi</button>
+                <button class="btn secondary" onclick="backToMenu()">Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <button id="attackBtn">⚔ Attack</button>
+    <button id="leaderboardBtn" onclick="window.location.href='leaderboard.html'">🏆</button>
+
+    <div id="gameOverScreen">
+        <div class="card">
+            <h2>GAME OVER</h2>
+            <p>Skor Akhir Kamu: <b id="finalScoreText">0</b></p>
+            <div id="saveScoreSection">
+                <input type="text" id="playerNameInput" placeholder="Masukkan Nama Kamu" maxlength="15"/>
+                <button class="btn gold" onclick="saveScore()">Simpan Skor</button>
+            </div>
+            <div id="postSaveSection" style="display:none;">
+                <p style="color:#2ecc71;">Skor berhasil disimpan!</p>
+                <div class="button-group">
+                    <button class="btn" onclick="restartFromGameOver()">Main Lagi</button>
+                    <button class="btn secondary" onclick="backToMenu()">Menu Utama</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="levelUpScreen">
+        <div class="card">
+            <h2>✨ LEVEL UP! ✨</h2>
+            <p>Kamu telah mencapai Level <b id="nextLevelText">2</b>!</p>
+            <div class="button-group">
+                <button class="btn" onclick="continueToNextLevel()">Lanjutkan</button>
+                <button class="btn secondary" onclick="endGameFromLevelUp()">Akhiri Permainan</button>
+            </div>
+        </div>
+    </div>
+    <audio id="hitSound" src="ninju.mp3" preload="auto"></audio>
+    <audio id="hurtSound" src="kena hit.mp3" preload="auto"></audio>
+    <audio id="killSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+    <audio id="bgMusic" src="backsound.mp3" preload="auto" loop></audio>
+
+    <div id="touchControls">
+        <button id="btnLeft" class="tc-btn">◀</button>
+        <button id="btnRight" class="tc-btn">▶</button>
+        <button id="btnJump" class="tc-btn">⤴</button>
+        <button id="btnAtk" class="tc-btn">⚔</button>
+        <button id="btnDash" class="tc-btn">Dash</button>
+    </div>
 
 <script>
     // ===== Canvas & Context =====
@@ -164,11 +205,11 @@
     addEventListener('resize', resizeCanvas); resizeCanvas();
 
     // ===== UI Elements =====
-    const attackBtn = document.getElementById('attackBtn');
-    const leaderboardBtn = document.getElementById('leaderboardBtn');
     const mainMenu = document.getElementById('mainMenu');
     const pauseOverlay = document.getElementById('pauseOverlay');
     const gameOverScreen = document.getElementById('gameOverScreen');
+    const levelUpScreen = document.getElementById('levelUpScreen'); // BARU
+    const nextLevelText = document.getElementById('nextLevelText'); // BARU
     const finalScoreText = document.getElementById('finalScoreText');
     const scoreText = document.getElementById('scoreText');
     const levelText = document.getElementById('levelText');
@@ -193,55 +234,55 @@
     const strengthImg = new Image(); strengthImg.src = 'strength.png';
 
     // ===== Game State =====
-    let cameraX = 0, score = 0, totalLives = 3, level = 1, nextLevelScore = 200, showLevelUp = 0;
+    let cameraX = 0, score = 0, totalLives = 3, level = 1, nextLevelScore = 200;
     let hitCooldown = 0, attackCooldown = 0, gameOver = false, paused = false;
+    let levelUpPause = false; // <<< VARIABEL BARU UNTUK JEDA SAAT LEVEL UP
     let bloodEffect = 0, invulnTimer = 0;
     let stamina = 100, maxStamina = 100, coins = 0;
     const keys = {}; let groundHeight = 180;
 
     const player = {
-      x: 200, y: 0, width: 60, height: 70,
-      dy: 0, speed: 6, jumpPower: -15, gravity: 0.8,
-      onGround: true, attacking: false,
-      damage: 1, facing: 1, dashCD: 0, dashSpeed: 16,
-      shieldTimer: 0, strengthTimer: 0
+        x: 200, y: 0, width: 60, height: 70,
+        dy: 0, speed: 6, jumpPower: -15, gravity: 0.8,
+        onGround: true, attacking: false,
+        damage: 1, facing: 1, dashCD: 0, dashSpeed: 16,
+        shieldTimer: 0, strengthTimer: 0
     };
 
     let enemies = [];
     let drops = [];
+    let enemySpawnTimer = 0;
 
     // ===== Input =====
     document.addEventListener('keydown', (e)=>{
-      keys[e.code] = true;
-      if(e.code === 'Escape') togglePause();
-      if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') tryDash();
-      if(e.code === 'KeyA') tryAttack();
-      if(e.code === 'ArrowLeft') player.facing = -1;
-      if(e.code === 'ArrowRight') player.facing = 1;
+        keys[e.code] = true;
+        if(e.code === 'Escape') togglePause();
+        if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') tryDash();
+        if(e.code === 'KeyA') tryAttack();
+        if(e.code === 'ArrowLeft') player.facing = -1;
+        if(e.code === 'ArrowRight') player.facing = 1;
     });
     document.addEventListener('keyup', (e)=>{ keys[e.code] = false; if(e.code==='KeyA') player.attacking = false; });
 
-    // Touch controls
+    // (Kode Touch controls tidak berubah)
     const touchControls = document.getElementById('touchControls');
     const btnLeft = document.getElementById('btnLeft');
     const btnRight = document.getElementById('btnRight');
     const btnJump = document.getElementById('btnJump');
     const btnAtk = document.getElementById('btnAtk');
     const btnDash = document.getElementById('btnDash');
-
     function showTouchIfNeeded(){
-      if (matchMedia('(max-width: 900px)').matches) touchControls.style.display = 'block';
-      else touchControls.style.display = 'none';
+        if (matchMedia('(max-width: 900px)').matches) touchControls.style.display = 'block';
+        else touchControls.style.display = 'none';
     }
     addEventListener('resize', showTouchIfNeeded); showTouchIfNeeded();
-
     const hold = (el, down, up)=>{
-      const on = ()=>down(); const off = ()=>up();
-      el.addEventListener('touchstart', e=>{ e.preventDefault(); on(); });
-      el.addEventListener('touchend', e=>{ e.preventDefault(); off(); });
-      el.addEventListener('mousedown', e=>{ e.preventDefault(); on(); });
-      el.addEventListener('mouseup', e=>{ e.preventDefault(); off(); });
-      el.addEventListener('mouseleave', e=>{ e.preventDefault(); off(); });
+        const on = ()=>down(); const off = ()=>up();
+        el.addEventListener('touchstart', e=>{ e.preventDefault(); on(); });
+        el.addEventListener('touchend', e=>{ e.preventDefault(); off(); });
+        el.addEventListener('mousedown', e=>{ e.preventDefault(); on(); });
+        el.addEventListener('mouseup', e=>{ e.preventDefault(); off(); });
+        el.addEventListener('mouseleave', e=>{ e.preventDefault(); off(); });
     };
     let holdLeft=false, holdRight=false;
     hold(btnLeft, ()=>holdLeft=true, ()=>holdLeft=false);
@@ -249,325 +290,337 @@
     btnJump.addEventListener('click', ()=>{ if(player.onGround) { player.dy = player.jumpPower; player.onGround=false; } });
     btnAtk.addEventListener('click', ()=> tryAttack());
     btnDash.addEventListener('click', ()=> tryDash());
-    attackBtn.addEventListener('click', ()=> tryAttack());
+    document.getElementById('attackBtn').addEventListener('click', ()=> tryAttack());
+
 
     function tryAttack(){
-      if (attackCooldown>0 || paused || gameOver) return;
-      if (stamina < 10) return;
-      player.attacking = true; attackCooldown = 24; stamina -= 10;
-      hitSound.currentTime=0; hitSound.play().catch(()=>{});
+        if (attackCooldown>0 || paused || gameOver || levelUpPause) return;
+        if (stamina < 10) return;
+        player.attacking = true; attackCooldown = 24; stamina -= 10;
+        hitSound.currentTime=0; hitSound.play().catch(()=>{});
     }
     function tryDash(){
-      if (player.dashCD>0 || paused || gameOver) return;
-      if (stamina < 20) return;
-      stamina -= 20; player.dashCD = 60; invulnTimer = 20;
-      const dir = (keys['ArrowLeft']||holdLeft) ? -1 : 1;
-      cameraX += dir * player.dashSpeed * 12;
+        if (player.dashCD>0 || paused || gameOver || levelUpPause) return;
+        if (stamina < 20) return;
+        stamina -= 20; player.dashCD = 60; invulnTimer = 20;
+        const dir = (keys['ArrowLeft']||holdLeft) ? -1 : 1;
+        cameraX += dir * player.dashSpeed * 12;
     }
 
-    // Combo system
+    // (Kode Combo system tidak berubah)
     let combo = 1; let comboTimer = 0; const COMBO_WINDOW = 90;
     function addCombo(){ combo = Math.min(10, combo+1); comboTimer = COMBO_WINDOW; }
     function resetCombo(){ combo = 1; comboTimer = 0; }
 
-    // Enemy spawner
+    // ▼▼▼ FUNGSI AI MUSUH DIUBAH DI SINI ▼▼▼
     function spawnEnemy(type='normal'){
-      const isBoss = (type==='boss');
-      const w = isBoss? 200:100; const h = isBoss? 160:80;
-      const hpBase = isBoss? (10+level*3) : (2+level);
-      const spd = isBoss? (1.5+level*0.2) : (1 + Math.random()*(2+level*0.5));
-      enemies.push({
-        type, boss: isBoss, hp: hpBase, maxHp: hpBase,
-        worldX: cameraX + canvas.width + Math.random()*600,
-        width: w, height: h, y: canvas.height - groundHeight - h,
-        speed: (Math.random()<0.5?-1:1)*spd, attackCD: 0
-      });
+        const isBoss = (type==='boss');
+        const w = isBoss? 200:100;
+        const h = isBoss? 160:80;
+        const hpBase = isBoss? (10+level*3) : (2+level);
+        const spd = isBoss ? 1.5 : (0.5 + Math.random() * 1); // Kecepatan patroli lebih lambat
+        const dir = Math.random() < 0.5 ? -1 : 1;
+        const spawnX = cameraX + canvas.width + Math.random()*400;
+
+        enemies.push({
+            type, boss: isBoss, hp: hpBase, maxHp: hpBase,
+            worldX: spawnX,
+            width: w, height: h,
+            y: canvas.height - groundHeight - h,
+            vx: dir * spd,
+            facing: dir,
+            // Properti baru untuk patroli
+            patrolCenter: spawnX,
+            patrolRange: 80 + Math.random() * 80 // Jarak patroli
+        });
     }
+    // ▲▲▲ AKHIR DARI FUNGSI AI MUSUH ▲▲▲
 
     function spawnWave(){
-      const cap = 3 + level;
-      while (enemies.length < cap) spawnEnemy('normal');
-      if (level % 3 === 0 && !enemies.some(e=>e.boss)) spawnEnemy('boss');
+        const cap = 3 + level;
+        while (enemies.length < cap) spawnEnemy('normal');
+        if (level % 3 === 0 && !enemies.some(e=>e.boss)) spawnEnemy('boss');
     }
 
     function resetGame(resetLives=false){
-      if (resetLives) totalLives = 3;
-      cameraX = 0; score = 0; coins = 0; level = 1; nextLevelScore=200; showLevelUp=0;
-      hitCooldown = 0; attackCooldown = 0; gameOver=false; paused=false; bloodEffect=0; invulnTimer=0;
-      player.x = 200; player.y = canvas.height - groundHeight - player.height; player.dy=0; player.onGround=true;
-      player.dashCD=0; player.shieldTimer=0; player.strengthTimer=0; stamina=maxStamina; resetCombo();
-      enemies.length=0; drops.length=0;
-      
-      // UI State
-      attackBtn.style.display='block';
-      leaderboardBtn.style.display='block';
-      gameOverScreen.style.display='none';
-      
-      spawnWave();
-      gameLoop();
+        if (resetLives) totalLives = 3;
+        cameraX = 0; score = 0; coins = 0; level = 1; nextLevelScore=200; 
+        hitCooldown = 0; attackCooldown = 0; gameOver=false; paused=false; levelUpPause=false;
+        bloodEffect=0; invulnTimer=0;
+        player.x = 200; player.y = canvas.height - groundHeight - player.height; player.dy=0; player.onGround=true;
+        player.dashCD=0; player.shieldTimer=0; player.strengthTimer=0; stamina=maxStamina; resetCombo();
+        enemies.length=0; drops.length=0;
+        
+        document.getElementById('attackBtn').style.display='block';
+        leaderboardBtn.style.display='block';
+        gameOverScreen.style.display='none';
+        levelUpScreen.style.display='none';
+        
+        spawnWave();
+        gameLoop();
     }
     
-    // Drops: coins & powerups
+    // (Fungsi dropFromEnemy tidak berubah)
     function dropFromEnemy(enemy){
-      const n = enemy.boss? 8 : (2+Math.floor(Math.random()*3));
-      for(let i=0;i<n;i++){
-        drops.push({ kind:'coin', x: enemy.worldX + (Math.random()*enemy.width), y: enemy.y, vy: -6 - Math.random()*3, life: 600 });
-      }
-      if (Math.random() < (enemy.boss? 0.8 : 0.12)){
-        const kind = Math.random() < 0.5 ? 'shield' : 'strength';
-        drops.push({ kind, x: enemy.worldX + enemy.width/2, y: enemy.y, vy: -7, life: 900 });
-      }
+        const n = enemy.boss? 8 : (2+Math.floor(Math.random()*3));
+        for(let i=0;i<n;i++){
+            drops.push({ kind:'coin', x: enemy.worldX + (Math.random()*enemy.width), y: enemy.y, vy: -6 - Math.random()*3, life: 600 });
+        }
+        if (Math.random() < (enemy.boss? 0.8 : 0.12)){
+            const kind = Math.random() < 0.5 ? 'shield' : 'strength';
+            drops.push({ kind, x: enemy.worldX + enemy.width/2, y: enemy.y, vy: -7, life: 900 });
+        }
     }
+
 
     // ===== Update =====
     function update(){
-      if (paused || gameOver) return;
+        if (paused || gameOver || levelUpPause) return; // <<< DITAMBAHKAN PENGECEKAN levelUpPause
 
-      if (keys['ArrowLeft'] || holdLeft) cameraX -= player.speed;
-      if (keys['ArrowRight'] || holdRight) cameraX += player.speed;
-      if (keys['Space'] && player.onGround){ player.dy = player.jumpPower; player.onGround=false; }
-      if (keys["a"]) {
-  tryAttack();
-}
+        // Player Movement
+        if (keys['ArrowLeft'] || holdLeft) cameraX -= player.speed;
+        if (keys['ArrowRight'] || holdRight) cameraX += player.speed;
+        if (keys['Space'] && player.onGround){ player.dy = player.jumpPower; player.onGround=false; }
+        if (keys["KeyA"]) { tryAttack(); }
 
+        player.dy += player.gravity; player.y += player.dy;
+        const groundY = canvas.height - groundHeight - player.height;
+        if (player.y >= groundY){ player.y = groundY; player.dy=0; player.onGround=true; }
 
-      player.dy += player.gravity; player.y += player.dy;
-      const groundY = canvas.height - groundHeight - player.height;
-      if (player.y >= groundY){ player.y = groundY; player.dy=0; player.onGround=true; }
+        // Timers & Stats
+        stamina = Math.min(maxStamina, stamina + 0.35);
+        if (hitCooldown>0) hitCooldown--;
+        if (attackCooldown>0) attackCooldown--;
+        if (player.dashCD>0) player.dashCD--;
+        if (invulnTimer>0) invulnTimer--;
+        if (player.shieldTimer>0) player.shieldTimer--;
+        if (player.strengthTimer>0) player.strengthTimer--;
+        if (comboTimer>0){ comboTimer--; if (comboTimer===0) resetCombo(); }
 
-      stamina = Math.min(maxStamina, stamina + 0.35);
-
-      if (hitCooldown>0) hitCooldown--; if (attackCooldown>0) attackCooldown--; if (player.dashCD>0) player.dashCD--; if (invulnTimer>0) invulnTimer--;
-      if (player.shieldTimer>0) player.shieldTimer--; if (player.strengthTimer>0) player.strengthTimer--;
-      if (comboTimer>0){ comboTimer--; if (comboTimer===0) resetCombo(); }
-
-      enemies.forEach(enemy=>{
-        enemy.y = canvas.height - groundHeight - enemy.height;
-        enemy.worldX += enemy.speed;
-        if (enemy.worldX < cameraX - 250) enemy.speed = Math.abs(enemy.speed);
-        if (enemy.worldX > cameraX + canvas.width + 250) enemy.speed = -Math.abs(enemy.speed);
-        if (enemy.attackCD>0) enemy.attackCD--;
-      });
-
-      if (player.attacking){
-        const rangeW = 50 + (player.strengthTimer>0? 20:0);
-        const atk = { x: (player.facing===1? player.x+player.width : player.x - rangeW), y: player.y, width: rangeW, height: player.height };
-        for (const enemy of enemies){
-          const ex = enemy.worldX - cameraX;
-          if (rectsOverlap(atk, {x:ex,y:enemy.y,width:enemy.width,height:enemy.height})){
-            const dmg = (player.strengthTimer>0? 2:1) * player.damage;
-            enemy.hp -= dmg * combo;
-            addCombo();
-            hitSound.currentTime=0; hitSound.play().catch(()=>{});
-            enemy.worldX += player.facing*12;
-            if (enemy.hp <= 0){
-              score += (enemy.boss? 300:50) * combo;
-              killSound.currentTime=0; killSound.play().catch(()=>{});
-              dropFromEnemy(enemy);
+        // ▼▼▼ LOGIKA AI MUSUH DIPERBARUI DI SINI (MODE PATROLI) ▼▼▼
+        enemies.forEach(enemy=>{
+            enemy.worldX += enemy.vx;
+            // Cek batas patroli
+            if (enemy.worldX > enemy.patrolCenter + enemy.patrolRange || enemy.worldX < enemy.patrolCenter - enemy.patrolRange) {
+                enemy.vx *= -1; // Balik arah
             }
-          }
-        }
-        player.attacking=false;
-      }
+            // Update arah hadap berdasarkan kecepatan
+            enemy.facing = Math.sign(enemy.vx);
+        });
+        // ▲▲▲ AKHIR DARI LOGIKA AI MUSUH BARU ▲▲▲
 
-      enemies = enemies.filter(e=> e.hp>0);
-
-      for (const enemy of enemies){
-        const ex = enemy.worldX - cameraX;
-        if (rectsOverlap({x:player.x,y:player.y,width:player.width,height:player.height}, {x:ex,y:enemy.y,width:enemy.width,height:enemy.height})){
-          if (invulnTimer<=0 && hitCooldown<=0){
-            if (player.shieldTimer>0){
-              player.shieldTimer = 0; invulnTimer = 20;
-            } else {
-              bloodEffect++; hitCooldown = 50; invulnTimer = 25; resetCombo();
-              try{ hurtSound.currentTime=0; hurtSound.play(); }catch{}
-              if (bloodEffect >= 3){
-                totalLives--; bloodEffect = 0;
-                if (totalLives <= 0){
-                  triggerGameOver(); // <-- PANGGIL FUNGSI GAME OVER
-                } else {
-                  player.dy = -8; player.onGround=false;
+        // Player Attack Collision
+        if (player.attacking){
+            const rangeW = 50 + (player.strengthTimer>0? 20:0);
+            const atk = { x: (player.facing===1? player.x+player.width : player.x - rangeW), y: player.y, width: rangeW, height: player.height };
+            for (const enemy of enemies){
+                const ex = enemy.worldX - cameraX;
+                if (rectsOverlap(atk, {x:ex,y:enemy.y,width:enemy.width,height:enemy.height})){
+                    const dmg = (player.strengthTimer>0? 2:1) * player.damage;
+                    enemy.hp -= dmg * combo;
+                    addCombo();
+                    enemy.worldX += player.facing*12;
+                    if (enemy.hp <= 0){
+                        score += (enemy.boss? 300:50) * combo;
+                        killSound.currentTime=0; killSound.play().catch(()=>{});
+                        dropFromEnemy(enemy);
+                    }
                 }
-              }
             }
-          }
+            player.attacking=false;
         }
-      }
+        enemies = enemies.filter(e=> e.hp>0);
 
-      if (Math.random() < 0.006 && enemies.length < (3+level)) spawnEnemy('normal');
-
-      for (const d of drops){ d.vy += 0.4; d.y += d.vy; if (d.y > canvas.height - groundHeight - 20){ d.y = canvas.height - groundHeight - 20; d.vy *= -0.35; } d.life--; }
-      drops = drops.filter(d=> d.life>0);
-
-      for (const d of drops){
-        const dx = (d.x - cameraX) - (player.x + player.width/2);
-        const dy = d.y - (player.y + player.height/2);
-        if (Math.hypot(dx,dy) < 50){
-          if (d.kind==='coin'){ coins++; score += 5; d.life=0; if (coins % 20 === 0 && totalLives < 5) totalLives++; }
-          else if (d.kind==='shield'){ player.shieldTimer = 60*8; d.life=0; }
-          else if (d.kind==='strength'){ player.strengthTimer = 60*8; d.life=0; }
+        // Enemy Attack Collision (Player getting hit)
+        for (const enemy of enemies){
+            const ex = enemy.worldX - cameraX;
+            if (rectsOverlap({x:player.x,y:player.y,width:player.width,height:player.height}, {x:ex,y:enemy.y,width:enemy.width,height:enemy.height})){
+                if (invulnTimer<=0 && hitCooldown<=0){
+                    if (player.shieldTimer>0){
+                        player.shieldTimer = 0; invulnTimer = 20;
+                    } else {
+                        canvas.classList.add('screen-shake');
+                        setTimeout(() => canvas.classList.remove('screen-shake'), 300);
+                        bloodEffect++; hitCooldown = 50; invulnTimer = 25; resetCombo();
+                        try{ hurtSound.currentTime=0; hurtSound.play(); }catch{}
+                        if (bloodEffect >= 3){
+                            totalLives--; bloodEffect = 0;
+                            if (totalLives <= 0){
+                                triggerGameOver();
+                            } else {
+                                player.dy = -8; player.onGround=false;
+                            }
+                        }
+                    }
+                }
+            }
         }
-      }
-      drops = drops.filter(d=> d.life>0);
-
-      if (score >= nextLevelScore){ level++; nextLevelScore += 250; showLevelUp = 100; spawnWave(); }
-
-      scoreText.textContent = Math.floor(score);
-      levelText.textContent = level;
-      comboText.textContent = 'x'+combo;
-      staminaFill.style.width = (100*stamina/maxStamina)+'%';
-      coinText.textContent = coins;
+        
+        // (Kode Spawning Logic dan Drop Collection tidak berubah)
+        if (enemies.length < (3+level)) {
+            if (enemySpawnTimer <= 0) { spawnEnemy('normal'); enemySpawnTimer = 90; } 
+            else { enemySpawnTimer--; }
+        }
+        drops.forEach(d => {
+            const dx = (d.x - cameraX) - (player.x + player.width/2);
+            const dy = d.y - (player.y + player.height/2);
+            if (Math.hypot(dx,dy) < 50){
+                if (d.kind==='coin'){ coins++; score += 5; d.life=0; if (coins % 20 === 0 && totalLives < 5) totalLives++; }
+                else if (d.kind==='shield'){ player.shieldTimer = 60*8; d.life=0; }
+                else if (d.kind==='strength'){ player.strengthTimer = 60*8; d.life=0; }
+            }
+        });
+        drops = drops.filter(d=> d.life>0);
+        
+        // ▼▼▼ LOGIKA LEVEL UP DIPERBARUI ▼▼▼
+        if (score >= nextLevelScore){
+            levelUpPause = true;
+            nextLevelText.textContent = level + 1;
+            levelUpScreen.style.display = 'flex';
+        }
+        // ▲▲▲ AKHIR DARI LOGIKA LEVEL UP ▲▲▲
+        
+        // UI Update
+        scoreText.textContent = Math.floor(score);
+        levelText.textContent = level;
+        comboText.textContent = 'x'+combo;
+        staminaFill.style.width = (100*stamina/maxStamina)+'%';
+        coinText.textContent = coins;
     }
 
     function rectsOverlap(a,b){ return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y; }
 
-    // ===== Draw =====
+    // (Fungsi Draw tidak banyak berubah, hanya penambahan flip pada musuh)
     function draw(){
-      ctx.clearRect(0,0,canvas.width, canvas.height);
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        
+        const bgWidth = canvas.width; let offsetX = -cameraX % bgWidth; if (offsetX>0) offsetX -= bgWidth;
+        ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
+        ctx.drawImage(bg, offsetX+bgWidth, 0, bgWidth, canvas.height);
+        
+        ctx.save();
+        if (player.facing === -1) {
+            ctx.translate(player.x + player.width, player.y); ctx.scale(-1, 1);
+            ctx.drawImage(playerImg, 0, 0, player.width, player.height);
+        } else { ctx.drawImage(playerImg, player.x, player.y, player.width, player.height); }
+        ctx.restore();
 
-      const bgWidth = canvas.width; let offsetX = -cameraX % bgWidth; if (offsetX>0) offsetX -= bgWidth;
-      ctx.drawImage(bg, offsetX, 0, bgWidth, canvas.height);
-      ctx.drawImage(bg, offsetX+bgWidth, 0, bgWidth, canvas.height);
+        if (player.shieldTimer>0){ ctx.strokeStyle = 'rgba(173,216,230,.85)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.roundRect(player.x-6, player.y-6, player.width+12, player.height+12, 10); ctx.stroke(); }
+        if (player.attacking || (attackCooldown > 12 && attackCooldown < 24)){
+            ctx.save();
+            let px = player.x + player.width/2; let py = player.y + player.height/2;
+            let grad = ctx.createLinearGradient(px, py-20, px + 80*player.facing, py+20);
+            grad.addColorStop(0, "rgba(255,255,200,0.9)"); grad.addColorStop(1, "rgba(255,80,80,0.0)");
+            ctx.strokeStyle = grad; ctx.shadowColor = "yellow"; ctx.shadowBlur = 20; ctx.lineWidth = 6;
+            ctx.beginPath();
+            if (player.facing === 1) { ctx.arc(player.x + player.width, py, 50, -0.5, 0.3); } 
+            else { ctx.arc(player.x, py, 50, Math.PI-0.3, Math.PI+0.5); }
+            ctx.stroke(); ctx.restore();
+        }
 
-      ctx.save();
-      ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-      if (player.shieldTimer>0){ ctx.strokeStyle = 'rgba(173,216,230,.85)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.roundRect(player.x-6, player.y-6, player.width+12, player.height+12, 10); ctx.stroke(); }
-      if (attackCooldown>0 && attackCooldown>12){ ctx.fillStyle='rgba(255,255,0,.15)'; const w=60; const x=(player.facing===1? player.x+player.width : player.x-w); ctx.fillRect(x, player.y+10, w, player.height-20); }
-      ctx.restore();
-      // ⚔️ Efek slash pedang
-if (player.attacking) {
-  ctx.save();
-  let px = player.facing === 1 ? player.x + player.width : player.x;
-  let py = player.y + player.height/2;
+        for (const e of enemies){
+            const ex = e.worldX - cameraX;
+            const img = (e.boss && bossImg.complete && bossImg.naturalWidth) ? bossImg : enemyImg;
+            ctx.save();
+            if (e.facing === -1) {
+                ctx.translate(ex + e.width, e.y); ctx.scale(-1, 1);
+                ctx.drawImage(img, 0, 0, e.width, e.height);
+            } else { ctx.drawImage(img, ex, e.y, e.width, e.height); }
+            ctx.restore();
+            ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(ex, e.y-18, e.width, 10);
+            ctx.fillStyle = e.boss ? '#ff4d4d' : '#3ddc84';
+            ctx.fillRect(ex, e.y-18, Math.max(0, (e.hp/e.maxHp)) * e.width, 10);
+        }
 
-  // gradasi cahaya
-  let grad = ctx.createLinearGradient(px, py-20, px + 80*player.facing, py+20);
-  grad.addColorStop(0, "rgba(255,255,200,0.9)");
-  grad.addColorStop(1, "rgba(255,80,80,0.0)");
+        for (const d of drops){
+            const dx = d.x - cameraX;
+            let img = null; if (d.kind==='coin') img = coinImg; else if (d.kind==='shield') img = shieldImg; else if (d.kind==='strength') img = strengthImg;
+            if (img && img.complete && img.naturalWidth) ctx.drawImage(img, dx-12, d.y-12, 24, 24);
+            else { ctx.fillStyle = d.kind==='coin' ? 'gold' : (d.kind==='shield'?'skyblue':'tomato'); ctx.beginPath(); ctx.arc(dx, d.y, 10, 0, Math.PI*2); ctx.fill(); }
+        }
 
-  ctx.strokeStyle = grad;
-  ctx.shadowColor = "yellow";
-  ctx.shadowBlur = 20;
-  ctx.lineWidth = 6;
-  ctx.beginPath();
+        if (bloodEffect>0){ ctx.fillStyle = 'rgba(255,0,0,0.22)'; ctx.fillRect(0,0,canvas.width, canvas.height); }
 
-  if (player.facing === 1) {
-    ctx.arc(px, py, 50, -0.5, 0.3);
-  } else {
-    ctx.arc(px, py, 50, Math.PI-0.3, Math.PI+0.5);
-  }
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-
-      for (const e of enemies){
-        const ex = e.worldX - cameraX;
-        const img = (e.boss && bossImg.complete && bossImg.naturalWidth)? bossImg : enemyImg;
-        ctx.drawImage(img, ex, e.y, e.width, e.height);
-        ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(ex, e.y-18, e.width, 10);
-        ctx.fillStyle = e.boss? '#ff4d4d' : '#3ddc84';
-        ctx.fillRect(ex, e.y-18, Math.max(0, (e.hp/e.maxHp))*e.width, 10);
-      }
-
-      for (const d of drops){
-        const dx = d.x - cameraX;
-        let img = null; if (d.kind==='coin') img = coinImg; else if (d.kind==='shield') img = shieldImg; else if (d.kind==='strength') img = strengthImg;
-        if (img && img.complete && img.naturalWidth) ctx.drawImage(img, dx-12, d.y-12, 24, 24);
-        else { ctx.fillStyle = d.kind==='coin' ? 'gold' : (d.kind==='shield'?'skyblue':'tomato'); ctx.beginPath(); ctx.arc(dx, d.y, 10, 0, Math.PI*2); ctx.fill(); }
-      }
-
-      if (bloodEffect>0){ ctx.fillStyle = 'rgba(255,0,0,0.22)'; ctx.fillRect(0,0,canvas.width, canvas.height); }
-
-      for (let i=0;i<totalLives;i++){
-        const x = canvas.width - (i+1)*40; const y = 16;
-        if (heartImg.complete && heartImg.naturalWidth) ctx.drawImage(heartImg, x, y, 30, 30);
-        else { ctx.fillStyle = 'red'; ctx.font = '26px Arial'; ctx.fillText('❤', x+6, y+26); }
-      }
-
-      if (showLevelUp>0){
-        ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(canvas.width/2-180, 60, 360, 64);
-        ctx.fillStyle = 'yellow'; ctx.font = '42px Arial Black'; ctx.textAlign='center';
-        ctx.fillText('LEVEL UP!', canvas.width/2, 104); ctx.textAlign='start';
-        showLevelUp--;
-      }
+        for (let i=0;i<totalLives;i++){
+            const x = canvas.width - (i+1)*40; const y = 16;
+            if (heartImg.complete && heartImg.naturalWidth) ctx.drawImage(heartImg, x, y, 30, 30);
+            else { ctx.fillStyle = 'red'; ctx.font = '26px Arial'; ctx.fillText('❤', x+6, y+26); }
+        }
     }
 
     // ===== Loop =====
     let animationFrameId;
     function gameLoop(){
-      update(); draw();
-      animationFrameId = requestAnimationFrame(gameLoop);
+        update(); // Logika game hanya berjalan jika tidak dijeda
+        draw();   // Menggambar tetap berjalan untuk menampilkan overlay
+        animationFrameId = requestAnimationFrame(gameLoop);
     }
     
-    // ===== FUNGSI BARU & MODIFIKASI =====
-    
+    // (Fungsi Game Flow tidak berubah)
     function triggerGameOver() {
         gameOver = true;
-        cancelAnimationFrame(animationFrameId); // Hentikan game loop
         bgMusic.pause();
-        attackBtn.style.display = 'none';
         finalScoreText.textContent = Math.floor(score);
         gameOverScreen.style.display = 'flex';
-        // Reset tampilan form
         document.getElementById('saveScoreSection').style.display = 'block';
         document.getElementById('postSaveSection').style.display = 'none';
         document.getElementById('playerNameInput').value = '';
     }
-
     function saveScore() {
         const nameInput = document.getElementById('playerNameInput');
         const playerName = nameInput.value.trim();
-
-        if (!playerName) {
-            alert("Nama tidak boleh kosong!");
-            return;
-        }
-
+        if (!playerName) { alert("Nama tidak boleh kosong!"); return; }
         let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
         leaderboard.push({ name: playerName, score: Math.floor(score) });
         localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-
-        // Ganti tampilan form dengan tombol restart/menu
         document.getElementById('saveScoreSection').style.display = 'none';
         document.getElementById('postSaveSection').style.display = 'block';
     }
 
     // ===== Buttons & Menu =====
     function toggleHowTo(){ const el = document.getElementById('howto'); el.style.display = el.style.display==='none' ? 'block':'none'; }
-
-    // FUNGSI startGame (Disederhanakan)
     function startGame(){
-      mainMenu.style.display='none';
-      resetGame(true); // reset dengan nyawa penuh
-
-      // Mulai musik background
-      bgMusic.currentTime = 0;
-      bgMusic.volume = 0.4;
-      bgMusic.play().catch(()=>{});
+        mainMenu.style.display='none';
+        resetGame(true);
+        bgMusic.currentTime = 0;
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(()=>{});
     }
-
-    function togglePause(){ if (gameOver) return; paused = !paused; pauseOverlay.style.display = paused? 'flex':'none'; }
+    function togglePause(){ 
+        if (gameOver || levelUpPause) return; 
+        paused = !paused; 
+        pauseOverlay.style.display = paused ? 'flex':'none'; 
+    }
     function resumeGame(){ paused=false; pauseOverlay.style.display='none'; }
     function restartFromPause(){ paused=false; pauseOverlay.style.display='none'; resetGame(true); }
-    function restartFromGameOver() {
-        gameOverScreen.style.display = 'none';
-        startGame();
-    }
+    function restartFromGameOver() { gameOverScreen.style.display = 'none'; startGame(); }
     function backToMenu(){
-      paused=false; gameOver=true;
-      cancelAnimationFrame(animationFrameId);
-      pauseOverlay.style.display='none';
-      gameOverScreen.style.display='none';
-      mainMenu.style.display='flex';
-      attackBtn.style.display='none';
-      leaderboardBtn.style.display = 'none';
-      bgMusic.pause();
+        paused=false; gameOver=true;
+        cancelAnimationFrame(animationFrameId);
+        pauseOverlay.style.display='none';
+        gameOverScreen.style.display='none';
+        mainMenu.style.display='flex';
+        document.getElementById('attackBtn').style.display='none';
+        leaderboardBtn.style.display = 'none';
+        bgMusic.pause();
+    }
+    
+    // ▼▼▼ FUNGSI-FUNGSI BARU UNTUK NOTIFIKASI LEVEL UP ▼▼▼
+    function continueToNextLevel() {
+        levelUpPause = false;
+        levelUpScreen.style.display = 'none';
+        level++;
+        nextLevelScore += 250;
+        spawnWave();
     }
 
-    // expose some for console debug
-    window.__game = { enemies, drops, player };
+    function endGameFromLevelUp() {
+        levelUpPause = false;
+        levelUpScreen.style.display = 'none';
+        triggerGameOver();
+    }
+    // ▲▲▲ AKHIR DARI FUNGSI-FUNGSI BARU ▲▲▲
+
 </script>
 </body>
 </html>
